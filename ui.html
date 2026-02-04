@@ -59,31 +59,341 @@
             color: var(--figma-color-text-disabled);
             cursor: default;
         }
+
+        /* Form Styles */
+        .section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--figma-color-text);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            font-size: 11px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .controls {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding-left: 2px;
+        }
+
+        .controls.visible {
+            display: flex;
+        }
+
+        input[type="text"] {
+            background-color: var(--figma-color-bg-secondary);
+            border: 1px solid var(--figma-color-border);
+            color: var(--figma-color-text);
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            padding: 8px;
+            border-radius: 2px;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--figma-color-border-brand);
+        }
+
+        /* Custom List Styles */
+        .color-list {
+            background-color: var(--figma-color-bg-secondary);
+            border: 1px solid var(--figma-color-border);
+            border-radius: 2px;
+            max-height: 140px;
+            overflow-y: auto;
+            margin-top: 4px;
+        }
+
+        .color-group {
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--figma-color-text-tertiary);
+            background-color: var(--figma-color-bg-tertiary);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .color-item:hover {
+            background-color: var(--figma-color-bg-hover);
+        }
+
+        .color-item.selected {
+            background-color: var(--figma-color-bg-brand);
+            color: var(--figma-color-text-onbrand);
+        }
+
+        .swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid var(--figma-color-border);
+            flex-shrink: 0;
+        }
+
+        .swatch.invalid {
+            background: linear-gradient(45deg, transparent 45%, var(--figma-color-icon-danger) 45%, var(--figma-color-icon-danger) 55%, transparent 55%);
+            background-size: 8px 8px;
+            border-color: var(--figma-color-border-danger);
+        }
+
+        /* Radio Group */
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--figma-color-text);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        input[type="radio"] {
+            margin: 0;
+            accent-color: var(--figma-color-bg-brand);
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .content-section.visible {
+            display: flex;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--figma-color-border);
+            flex-shrink: 0;
+        }
     </style>
 </head>
 
 <body>
-    <div>
+    <div style="padding: 16px 16px 0 16px;">
         <h2>Icon Architect</h2>
-        <p>Standardize selected frames by flattening vectors and centering them.</p>
+        <p style="margin-bottom: 12px;">Standardize selected frames options.</p>
+
+        <div class="label">Color Mode</div>
+        <div class="radio-group">
+            <label class="radio-label">
+                <input type="radio" name="colorMode" value="ORIGINAL" checked> Original
+            </label>
+            <label class="radio-label">
+                <input type="radio" name="colorMode" value="HEX"> HEX
+            </label>
+            <label class="radio-label">
+                <input type="radio" name="colorMode" value="STYLE"> Styles
+            </label>
+        </div>
     </div>
-    <button id="standardizeBtn" disabled>Standardize Selection (0)</button>
+
+    <!-- Section: Hex -->
+    <div id="section-hex" class="content-section" style="padding: 0 16px;">
+        <div class="label">Custom Hex Color</div>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <div id="hexPreview"
+                style="width:32px; height:32px; border-radius:4px; border:1px solid var(--figma-color-border); background:#000000;">
+            </div>
+            <input type="text" id="hexInput" placeholder="#000000" value="#000000">
+        </div>
+    </div>
+
+    <!-- Section: Style -->
+    <div id="section-style" class="content-section" style="padding: 0 16px;">
+        <div class="label">Select Style or Variable</div>
+        <input type="text" id="searchInput" placeholder="Search colors...">
+        <div id="colorList" class="color-list">
+            <!-- Populated by JS -->
+            <div style="padding:8px; color: var(--figma-color-text-secondary); text-align:center;">Loading...</div>
+        </div>
+        <input type="hidden" id="selectedAssetId">
+    </div>
+
+    <div class="footer" style="padding: 16px;">
+        <button id="standardizeBtn" disabled>Standardize Selection (0)</button>
+    </div>
 
     <script>
         const btn = document.getElementById('standardizeBtn');
+        const colorList = document.getElementById('colorList');
+        const searchInput = document.getElementById('searchInput');
+        const hexInput = document.getElementById('hexInput');
+        const hexPreview = document.getElementById('hexPreview');
+        const selectedAssetIdInput = document.getElementById('selectedAssetId');
+        const radios = document.getElementsByName('colorMode');
+
+        let allAssets = [];
+        let selectedAssetId = null;
+        let activeStrategy = 'ORIGINAL';
+
+        // Radio Logic
+        radios.forEach(r => {
+            r.onchange = () => {
+                activeStrategy = r.value;
+                updateVisibility();
+            };
+        });
+
+        function updateVisibility() {
+            document.getElementById('section-hex').classList.remove('visible');
+            document.getElementById('section-style').classList.remove('visible');
+
+            if (activeStrategy === 'HEX') {
+                document.getElementById('section-hex').classList.add('visible');
+            } else if (activeStrategy === 'STYLE') {
+                document.getElementById('section-style').classList.add('visible');
+            }
+        }
+
+        // Hex Logic
+        hexInput.oninput = () => {
+            hexPreview.style.background = hexInput.value;
+        };
+
+        // Search Filter
+        searchInput.oninput = () => {
+            renderList(searchInput.value);
+        };
+
+        function renderList(filter = "") {
+            colorList.innerHTML = "";
+            const term = filter.toLowerCase();
+
+            // Group first
+            const groups = {};
+
+            allAssets.forEach(asset => {
+                const match = asset.name.toLowerCase().includes(term) || asset.group.toLowerCase().includes(term);
+                if (!match) return;
+
+                if (!groups[asset.group]) groups[asset.group] = [];
+                groups[asset.group].push(asset);
+            });
+
+            if (Object.keys(groups).length === 0) {
+                const div = document.createElement('div');
+                div.style.padding = "8px";
+                div.style.color = "var(--figma-color-text-secondary)";
+                div.textContent = "No colors found.";
+                colorList.appendChild(div);
+                return;
+            }
+
+            for (const groupName in groups) {
+                const header = document.createElement('div');
+                header.className = 'color-group';
+                header.textContent = groupName;
+                colorList.appendChild(header);
+
+                groups[groupName].forEach(asset => {
+                    const item = document.createElement('div');
+                    item.className = 'color-item';
+                    if (asset.id === selectedAssetId) item.classList.add('selected');
+
+                    const swatch = document.createElement('div');
+                    swatch.className = 'swatch';
+
+                    if (asset.hex) {
+                        swatch.style.backgroundColor = asset.hex;
+                    } else {
+                        swatch.classList.add('invalid');
+                        swatch.title = "Could not resolve color preview";
+                    }
+
+                    const name = document.createElement('span');
+                    name.textContent = asset.name;
+
+                    item.appendChild(swatch);
+                    item.appendChild(name);
+
+                    item.onclick = () => {
+                        selectAsset(asset);
+                    };
+
+                    colorList.appendChild(item);
+                });
+            }
+        }
+
+        function selectAsset(asset) {
+            selectedAssetId = asset.id;
+            selectedAssetIdInput.value = asset.id;
+            renderList(searchInput.value);
+        }
 
         window.onmessage = (event) => {
             const msg = event.data.pluginMessage;
+
             if (msg && msg.type === 'selection-updated') {
                 btn.textContent = `Standardize Selection (${msg.count})`;
                 btn.disabled = msg.count === 0;
             }
+
+            if (msg && msg.type === 'color-assets') {
+                allAssets = msg.assets;
+                renderList();
+            }
         };
 
         btn.onclick = () => {
-            parent.postMessage({ pluginMessage: { type: 'standardize-selection' } }, '*');
+            let colorValue = null;
+            if (activeStrategy === 'HEX') colorValue = hexInput.value;
+            if (activeStrategy === 'STYLE') colorValue = selectedAssetId;
+
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'standardize-selection',
+                    colorOptions: {
+                        mode: activeStrategy,
+                        value: colorValue
+                    }
+                }
+            }, '*');
         }
     </script>
 </body>
-
-</html>

@@ -1,17 +1,91 @@
 "use strict";
-figma.showUI(__html__, { width: 240, height: 140 });
+figma.showUI(__html__, { width: 240, height: 320 }); // Increased height for new UI
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + ((r * 255) | 0) * 65536 + ((g * 255) | 0) * 256 + ((b * 255) | 0)).toString(16).slice(1).toUpperCase();
+}
+function resolveColorFromVariable(variable) {
+    try {
+        // Resolve for current context (first selection or page)
+        const context = figma.currentPage.selection[0] || figma.currentPage;
+        const { value } = variable.resolveForConsumer(context);
+        if (value.type === "VARIABLE_ALIAS") {
+            const aliasId = value.id;
+            const aliasedVar = figma.variables.getVariableById(aliasId);
+            if (aliasedVar) {
+                return resolveColorFromVariable(aliasedVar);
+            }
+        }
+        else if (typeof value === "object" && "r" in value) {
+            const { r, g, b } = value;
+            return rgbToHex(r, g, b);
+        }
+    }
+    catch (e) {
+        // console.error("Failed to resolve variable", variable.name, e);
+    }
+    return null;
+}
+function getLocalColorAssets() {
+    const styles = figma.getLocalPaintStyles();
+    const variables = figma.variables.getLocalVariables("COLOR");
+    const assets = [
+        ...styles.map(s => {
+            let hex = "#CCCCCC";
+            if (s.paints[0] && s.paints[0].type === "SOLID") {
+                const { r, g, b } = s.paints[0].color;
+                hex = rgbToHex(r, g, b);
+            }
+            const parts = s.name.split("/");
+            const group = parts.length > 1 ? parts[0].trim() : "Other";
+            const name = parts.length > 1 ? parts.slice(1).join("/").trim() : s.name;
+            return { id: s.id, name, group, type: "STYLE", hex };
+        }),
+        ...variables.map(v => {
+            // For variables, we might not get a resolved color easily without context.
+            // Use a placeholder or attempt basic resolution if possible, but keeping it simple/safe is better.
+            const parts = v.name.split("/");
+            const group = parts.length > 1 ? parts[0].trim() : "Other";
+            const name = parts.length > 1 ? parts.slice(1).join("/").trim() : v.name;
+            const hex = resolveColorFromVariable(v);
+            return { id: v.id, name, group, type: "VARIABLE", hex };
+        })
+    ];
+    // Sort by Group then Name
+    assets.sort((a, b) => {
+        if (a.group < b.group)
+            return -1;
+        if (a.group > b.group)
+            return 1;
+        if (a.name < b.name)
+            return -1;
+        if (a.name > b.name)
+            return 1;
+        return 0;
+    });
+    figma.ui.postMessage({ type: 'color-assets', assets });
+}
 function sendSelectionCount() {
     const selection = figma.currentPage.selection;
     const count = selection.length;
     figma.ui.postMessage({ type: 'selection-updated', count: count });
 }
-// Initial count
+// Initial count and assets
 sendSelectionCount();
+getLocalColorAssets();
 // Listen for selection changes
 figma.on("selectionchange", sendSelectionCount);
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16) / 255,
+        g: parseInt(result[2], 16) / 255,
+        b: parseInt(result[3], 16) / 255
+    } : null;
+}
 figma.ui.onmessage = msg => {
     if (msg.type === 'standardize-selection') {
         const selection = figma.currentPage.selection;
+        const colorOptions = msg.colorOptions;
         let count = 0;
         const itemsToProcess = [];
         // Pre-process selection: Wrap Groups in Frames
@@ -59,6 +133,39 @@ figma.ui.onmessage = msg => {
                 flattened.name = "Vector";
                 // Set constraints (SCALE preserves relative position/size)
                 flattened.constraints = { horizontal: "SCALE", vertical: "SCALE" };
+                // Apply Color Logic
+                if (colorOptions && colorOptions.mode !== 'ORIGINAL') {
+                    const val = colorOptions.value;
+                    if (colorOptions.mode === 'HEX' && val) {
+                        const rgb = hexToRgb(val);
+                        if (rgb) {
+                            flattened.fills = [{ type: 'SOLID', color: rgb }];
+                        }
+                    }
+                    else if (colorOptions.mode === 'STYLE' && val) {
+                        // Try Style first
+                        const style = figma.getStyleById(val);
+                        if (style) {
+                            flattened.fillStyleId = style.id;
+                        }
+                        else {
+                            // Try Variable
+                            try {
+                                const variable = figma.variables.getVariableById(val);
+                                if (variable) {
+                                    const currentFills = flattened.fills.length > 0 ? [...flattened.fills] : [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+                                    if (currentFills[0].type === "SOLID") {
+                                        const newPaint = figma.variables.setBoundVariableForPaint(currentFills[0], 'color', variable);
+                                        flattened.fills = [newPaint];
+                                    }
+                                }
+                            }
+                            catch (e) {
+                                // console.error("Error applying variable", e);
+                            }
+                        }
+                    }
+                }
                 // Cleanup: Remove original group if it exists
                 if (item.originalGroup && !item.originalGroup.removed) {
                     item.originalGroup.remove();
