@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--figma-color-bg);
+            color: var(--figma-color-text);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        h2 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        p {
+            font-size: 11px;
+            color: var(--figma-color-text-secondary);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        button {
+            appearance: none;
+            background-color: var(--figma-color-bg-brand);
+            color: var(--figma-color-text-onbrand);
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s ease;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:active {
+            opacity: 0.8;
+        }
+
+        button:focus {
+            outline: 2px solid var(--figma-color-border-brand-strong);
+            outline-offset: 2px;
+        }
+
+        button:disabled {
+            background-color: var(--figma-color-bg-disabled);
+            color: var(--figma-color-text-disabled);
+            cursor: default;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <h2>Icon Architect</h2>
+        <p>Standardize selected frames by flattening vectors and centering them.</p>
+    </div>
+    <button id="standardizeBtn" disabled>Standardize Selection (0)</button>
+
+    <script>
+        const btn = document.getElementById('standardizeBtn');
+
+        window.onmessage = (event) => {
+            const msg = event.data.pluginMessage;
+            if (msg && msg.type === 'selection-updated') {
+                btn.textContent = `Standardize Selection (${msg.count})`;
+                btn.disabled = msg.count === 0;
+            }
+        };
+
+        btn.onclick = () => {
+            parent.postMessage({ pluginMessage: { type: 'standardize-selection' } }, '*');
+        }
+    </script>
+</body>
+
+</html>

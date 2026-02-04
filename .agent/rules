@@ -1,0 +1,6 @@
+- We are building a Figma Plugin.
+- code.ts = Main Thread (Access to Figma API, no DOM).
+- ui.html = Iframe (Access to DOM/CSS, no Figma API).
+- Communication must happen via figma.ui.postMessage and window.onmessage.
+- Use Figma Design Tokens for all CSS (e.g., color: var(--figma-color-text)).
+- Always flatten icon vectors to a single layer named "Vector".
