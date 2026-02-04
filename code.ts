@@ -1,4 +1,4 @@
-figma.showUI(__html__, { width: 240, height: 320 }); // Increased height for new UI
+figma.showUI(__html__, { width: 400, height: 600, themeColors: true });
 
 function rgbToHex(r: number, g: number, b: number) {
     return "#" + ((1 << 24) + ((r * 255) | 0) * 65536 + ((g * 255) | 0) * 256 + ((b * 255) | 0)).toString(16).slice(1).toUpperCase();
@@ -94,6 +94,12 @@ function hexToRgb(hex: string) {
 figma.ui.onmessage = msg => {
     if (msg.type === 'standardize-selection') {
         const selection = figma.currentPage.selection;
+
+        if (selection.length === 0) {
+            figma.notify("Select some icons to get started", { error: true });
+            return;
+        }
+
         const colorOptions = msg.colorOptions;
         let count = 0;
 
@@ -200,9 +206,11 @@ figma.ui.onmessage = msg => {
             }
         }
         if (count > 0) {
-            figma.notify(`Standardized ${count} icon${count === 1 ? '' : 's'}`);
+            figma.notify(`Standardized ${count} ${count === 1 ? 'icon' : 'icons'} successfully!`, { timeout: 2000 });
         } else {
-            figma.notify("No valid frames or components selected");
+            // Only notify if we didn't exit early (which we do for 0 selection)
+            // But if selection was >0 but no valid icons found:
+            figma.notify("No standardizable icons found in selection.", { error: true });
         }
     }
 };

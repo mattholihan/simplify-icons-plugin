@@ -2,259 +2,395 @@
 <html>
 
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --color-bg: #FFFFFF;
+            --color-text: #1E1E1E;
+            /* Dark Grey */
+            --color-text-secondary: #757575;
+            --color-text-inverse: #F5F5F5;
+            --color-border-active: #2C2C2C;
+            --color-border-inactive: #B2B2B2;
+            --color-brand: #1E1E1E;
+            --color-bg-secondary: #F5F5F5;
+            --color-danger: #F24822;
+
+            --radius-m: 8px;
+            --spacing-s: 8px;
+            --spacing-m: 16px;
+
+            --shadow-button: 0px 16px 16px rgba(12, 12, 13, 0.1), 0px 4px 4px rgba(12, 12, 13, 0.05);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--figma-color-bg);
-            color: var(--figma-color-text);
+            background-color: var(--color-bg);
+            color: var(--color-text);
             margin: 0;
-            padding: 16px;
+            padding: 0;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
         }
 
-        h2 {
-            font-size: 14px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        p {
-            font-size: 11px;
-            color: var(--figma-color-text-secondary);
-            margin: 0;
-            line-height: 1.4;
-        }
-
-        button {
-            appearance: none;
-            background-color: var(--figma-color-bg-brand);
-            color: var(--figma-color-text-onbrand);
-            border: 1px solid transparent;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 11px;
-            font-weight: 500;
-            cursor: pointer;
-            width: 100%;
-            transition: opacity 0.2s ease;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        button:active {
-            opacity: 0.8;
-        }
-
-        button:focus {
-            outline: 2px solid var(--figma-color-border-brand-strong);
-            outline-offset: 2px;
-        }
-
-        button:disabled {
-            background-color: var(--figma-color-bg-disabled);
-            color: var(--figma-color-text-disabled);
-            cursor: default;
-        }
-
-        /* Form Styles */
-        .section {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .label {
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--figma-color-text);
-        }
-
-        .radio-group {
-            display: flex;
-            gap: 16px;
-            font-size: 11px;
-        }
-
-        .radio-label {
+        /* Header */
+        .header {
+            background-color: var(--color-brand);
+            color: var(--color-text-inverse);
+            height: 56px;
+            padding: 0 24px;
             display: flex;
             align-items: center;
-            gap: 4px;
-            cursor: pointer;
-        }
-
-        .controls {
-            display: none;
-            flex-direction: column;
-            gap: 8px;
-            padding-left: 2px;
-        }
-
-        .controls.visible {
-            display: flex;
-        }
-
-        input[type="text"] {
-            background-color: var(--figma-color-bg-secondary);
-            border: 1px solid var(--figma-color-border);
-            color: var(--figma-color-text);
-            font-family: 'Inter', sans-serif;
-            font-size: 11px;
-            padding: 8px;
-            border-radius: 2px;
-            outline: none;
-            width: 100%;
+            justify-content: space-between;
+            flex-shrink: 0;
             box-sizing: border-box;
         }
 
-        input[type="text"]:focus {
-            border-color: var(--figma-color-border-brand);
-        }
-
-        /* Custom List Styles */
-        .color-list {
-            background-color: var(--figma-color-bg-secondary);
-            border: 1px solid var(--figma-color-border);
-            border-radius: 2px;
-            max-height: 140px;
-            overflow-y: auto;
-            margin-top: 4px;
-        }
-
-        .color-group {
-            padding: 4px 8px;
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--figma-color-text-tertiary);
-            background-color: var(--figma-color-bg-tertiary);
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-
-        .color-item {
+        .header-title {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 8px;
+            font-size: 16px;
+            font-weight: 400;
+            /* Regular per design */
+        }
+
+        .logo-placeholder {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Scrollable Body */
+        .content-scroll {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            padding-bottom: 90px;
+            /* Space for floating button */
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        h1 {
+            font-size: 20px;
+            /* Assuming roughly Heading Base */
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.5px;
+        }
+
+        p {
+            font-size: 16px;
+            /* Body Base */
+            line-height: 1.4;
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+
+        .label {
+            font-size: 16px;
+            font-weight: 600;
+            /* Body Strong */
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        /* Radio Cards */
+        .radio-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Hide actual radio inputs */
+        .radio-group input[type="radio"] {
+            position: absolute;
+            opacity: 0;
             cursor: pointer;
-            transition: background 0.1s;
+            height: 0;
+            width: 0;
         }
 
-        .color-item:hover {
-            background-color: var(--figma-color-bg-hover);
-        }
-
-        .color-item.selected {
-            background-color: var(--figma-color-bg-brand);
-            color: var(--figma-color-text-onbrand);
-        }
-
-        .swatch {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+        .radio-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 16px;
+            height: 48px;
             border: 1px solid var(--figma-color-border);
+            border-radius: var(--radius-m);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            position: relative;
+            flex: 1;
+            /* Distribute space */
+            background-color: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        .radio-card:hover {
+            border-color: var(--color-text);
+        }
+
+        .radio-card.active {
+            border: 1px solid var(--figma-color-bg-brand);
+            /* Keep 1px border but colored */
+            box-shadow: inset 0 0 0 1px var(--figma-color-bg-brand);
+            /* Inner thickening */
+        }
+
+        .radio-icon {
+            width: 24px;
+            height: 24px;
             flex-shrink: 0;
         }
 
-        .swatch.invalid {
-            background: linear-gradient(45deg, transparent 45%, var(--figma-color-icon-danger) 45%, var(--figma-color-icon-danger) 55%, transparent 55%);
-            background-size: 8px 8px;
-            border-color: var(--figma-color-border-danger);
+        .radio-text {
+            font-size: 16px;
+            font-weight: 400;
         }
 
-        /* Radio Group */
-        .radio-group {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 12px;
-            align-items: center;
+        /* Input Fields (Hex/Search) */
+        input[type="text"] {
+            width: 100%;
+            height: 48px;
+            padding: 0 16px;
+            border: 1px solid var(--color-border-inactive);
+            border-radius: var(--radius-m);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+            background: white;
+            color: var(--color-text);
         }
 
-        .radio-label {
+        input[type="text"]:focus {
+            border-color: var(--color-brand);
+            border-width: 2px;
+            padding-left: 15px;
+            /* Adjust for width change to prevent layout shift */
+        }
+
+        /* Color List */
+        .color-list {
+            border: 1px solid var(--color-border-inactive);
+            border-radius: var(--radius-m);
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            margin-top: 8px;
+        }
+
+        .color-group {
+            background: var(--color-bg-secondary);
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+        }
+
+        .color-item {
+            padding: 10px 16px;
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            color: var(--figma-color-text);
+            gap: 12px;
             cursor: pointer;
-            user-select: none;
+            border-bottom: 1px solid var(--color-bg-secondary);
         }
 
-        input[type="radio"] {
-            margin: 0;
-            accent-color: var(--figma-color-bg-brand);
+        .color-item:last-child {
+            border-bottom: none;
+        }
+
+        .color-item:hover {
+            background-color: var(--color-bg-secondary);
+        }
+
+        .color-item.selected {
+            background-color: #E8E8E8;
+            /* Slightly darker than hover */
+            font-weight: 500;
+        }
+
+        .swatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .swatch.invalid {
+            background: linear-gradient(45deg, transparent 45%, var(--color-danger) 45%, var(--color-danger) 55%, transparent 55%);
+            border-color: var(--color-danger);
         }
 
         /* Content Sections */
         .content-section {
             display: none;
             flex-direction: column;
-            gap: 8px;
-            flex-grow: 1;
-            overflow: hidden;
-            margin-bottom: 8px;
+            gap: 12px;
         }
 
         .content-section.visible {
             display: flex;
         }
 
-        .footer {
-            margin-top: auto;
-            padding-top: 16px;
-            border-top: 1px solid var(--figma-color-border);
-            flex-shrink: 0;
+        /* Floating Button Container */
+        .floating-action {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 229px;
+            z-index: 10;
+        }
+
+        button {
+            width: 100%;
+            height: 48px;
+            background-color: var(--color-brand);
+            color: var(--color-text-inverse);
+            border: none;
+            border-radius: var(--radius-m);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-button);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0px 20px 20px rgba(12, 12, 13, 0.15);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(1px);
+            box-shadow: var(--shadow-button);
+        }
+
+        button:disabled {
+            background-color: var(--figma-color-bg-disabled);
+            color: var(--figma-color-text-disabled);
+            opacity: 1;
+            /* Opaque as requested */
+            cursor: not-allowed;
+            box-shadow: none;
         }
     </style>
 </head>
 
 <body>
-    <div style="padding: 16px 16px 0 16px;">
-        <h2>Icon Architect</h2>
-        <p style="margin-bottom: 12px;">Standardize selected frames options.</p>
+    <!-- Header -->
+    <!-- Header Removed -->
 
-        <div class="label">Color Mode</div>
-        <div class="radio-group">
-            <label class="radio-label">
-                <input type="radio" name="colorMode" value="ORIGINAL" checked> Original
-            </label>
-            <label class="radio-label">
-                <input type="radio" name="colorMode" value="HEX"> HEX
-            </label>
-            <label class="radio-label">
-                <input type="radio" name="colorMode" value="STYLE"> Styles
-            </label>
+    <!-- Main Content -->
+    <div class="content-scroll">
+
+        <div style="margin-top: 0;">
+            <p>Standardize icon structures for perfect instance swapping</p>
         </div>
-    </div>
 
-    <!-- Section: Hex -->
-    <div id="section-hex" class="content-section" style="padding: 0 16px;">
-        <div class="label">Custom Hex Color</div>
-        <div style="display:flex; gap:8px; align-items:center;">
-            <div id="hexPreview"
-                style="width:32px; height:32px; border-radius:4px; border:1px solid var(--figma-color-border); background:#000000;">
+        <div>
+            <span class="label">Color Mode</span>
+            <div class="radio-group">
+                <!-- Original -->
+                <label class="radio-card active" id="card-original">
+                    <input type="radio" name="colorMode" value="ORIGINAL" checked>
+                    <!-- Unchecked SVG -->
+                    <svg class="radio-icon unchecked" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg" style="display:none">
+                        <circle cx="12" cy="12" r="11.5" stroke="#B2B2B2" />
+                    </svg>
+                    <!-- Checked SVG -->
+                    <svg class="radio-icon checked" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="11.5" stroke="#2C2C2C" />
+                        <circle cx="12" cy="12" r="6" fill="#2C2C2C" />
+                    </svg>
+                    <span class="radio-text">Original</span>
+                </label>
+
+                <!-- HEX -->
+                <label class="radio-card" id="card-hex">
+                    <input type="radio" name="colorMode" value="HEX">
+                    <svg class="radio-icon unchecked" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="11.5" stroke="#B2B2B2" />
+                    </svg>
+                    <svg class="radio-icon checked" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg" style="display:none">
+                        <circle cx="12" cy="12" r="11.5" stroke="#2C2C2C" />
+                        <circle cx="12" cy="12" r="6" fill="#2C2C2C" />
+                    </svg>
+                    <span class="radio-text">HEX</span>
+                </label>
+
+                <!-- Styles -->
+                <label class="radio-card" id="card-style">
+                    <input type="radio" name="colorMode" value="STYLE">
+                    <svg class="radio-icon unchecked" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="11.5" stroke="#B2B2B2" />
+                    </svg>
+                    <svg class="radio-icon checked" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg" style="display:none">
+                        <circle cx="12" cy="12" r="11.5" stroke="#2C2C2C" />
+                        <circle cx="12" cy="12" r="6" fill="#2C2C2C" />
+                    </svg>
+                    <span class="radio-text">Styles</span>
+                </label>
             </div>
-            <input type="text" id="hexInput" placeholder="#000000" value="#000000">
         </div>
+
+        <!-- Section: Hex -->
+        <div id="section-hex" class="content-section">
+            <span class="label">Custom Hex Color</span>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <div id="hexPreview"
+                    style="width:48px; height:48px; border-radius:8px; border:1px solid var(--color-border-inactive); background:#000000; flex-shrink:0;">
+                </div>
+                <input type="text" id="hexInput" placeholder="#000000" value="#000000">
+            </div>
+        </div>
+
+        <!-- Section: Style -->
+        <div id="section-style" class="content-section">
+            <span class="label">Select Style or Variable</span>
+            <input type="text" id="searchInput" placeholder="Search colors...">
+            <div id="colorList" class="color-list">
+                <!-- Populated by JS -->
+                <div style="padding:16px; color: var(--color-text-secondary); text-align:center;">Loading...</div>
+            </div>
+            <input type="hidden" id="selectedAssetId">
+        </div>
+
     </div>
 
-    <!-- Section: Style -->
-    <div id="section-style" class="content-section" style="padding: 0 16px;">
-        <div class="label">Select Style or Variable</div>
-        <input type="text" id="searchInput" placeholder="Search colors...">
-        <div id="colorList" class="color-list">
-            <!-- Populated by JS -->
-            <div style="padding:8px; color: var(--figma-color-text-secondary); text-align:center;">Loading...</div>
-        </div>
-        <input type="hidden" id="selectedAssetId">
-    </div>
-
-    <div class="footer" style="padding: 16px;">
+    <!-- Fixed Footer -->
+    <div class="floating-action">
         <button id="standardizeBtn" disabled>Standardize Selection (0)</button>
     </div>
 
@@ -271,11 +407,31 @@
         let selectedAssetId = null;
         let activeStrategy = 'ORIGINAL';
 
+        // Initialize Radio Visuals
+        function updateRadioVisuals() {
+            radios.forEach(r => {
+                const card = r.closest('.radio-card');
+                const uncheckedIcon = card.querySelector('.unchecked');
+                const checkedIcon = card.querySelector('.checked');
+
+                if (r.checked) {
+                    card.classList.add('active');
+                    uncheckedIcon.style.display = 'none';
+                    checkedIcon.style.display = 'block';
+                } else {
+                    card.classList.remove('active');
+                    uncheckedIcon.style.display = 'block';
+                    checkedIcon.style.display = 'none';
+                }
+            });
+        }
+
         // Radio Logic
         radios.forEach(r => {
             r.onchange = () => {
                 activeStrategy = r.value;
                 updateVisibility();
+                updateRadioVisuals();
             };
         });
 
@@ -317,8 +473,8 @@
 
             if (Object.keys(groups).length === 0) {
                 const div = document.createElement('div');
-                div.style.padding = "8px";
-                div.style.color = "var(--figma-color-text-secondary)";
+                div.style.padding = "16px";
+                div.style.color = "var(--color-text-secondary)";
                 div.textContent = "No colors found.";
                 colorList.appendChild(div);
                 return;
@@ -395,5 +551,10 @@
                 }
             }, '*');
         }
+
+        // Initial visual state
+        updateRadioVisuals();
     </script>
 </body>
+
+</html>
