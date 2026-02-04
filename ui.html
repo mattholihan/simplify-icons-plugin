@@ -130,7 +130,7 @@
             gap: 8px;
             padding: 0 16px;
             height: 48px;
-            border: 1px solid var(--figma-color-border);
+            border: 1px solid var(--color-border-inactive);
             border-radius: var(--radius-m);
             cursor: pointer;
             transition: all 0.1s ease;
@@ -146,9 +146,9 @@
         }
 
         .radio-card.active {
-            border: 1px solid var(--figma-color-bg-brand);
+            border: 1px solid var(--figma-color-border);
             /* Keep 1px border but colored */
-            box-shadow: inset 0 0 0 1px var(--figma-color-bg-brand);
+            box-shadow: inset 0 0 0 1px var(--figma-color-border);
             /* Inner thickening */
         }
 
@@ -293,7 +293,7 @@
 
         button:disabled {
             background-color: var(--figma-color-bg-disabled);
-            color: var(--figma-color-text-disabled);
+            color: var(--color-text-inverse);
             opacity: 1;
             /* Opaque as requested */
             cursor: not-allowed;
@@ -310,6 +310,7 @@
     <div class="content-scroll">
 
         <div style="margin-top: 0;">
+            <h1>Standardize Icons</h1>
             <p>Standardize icon structures for perfect instance swapping</p>
         </div>
 
