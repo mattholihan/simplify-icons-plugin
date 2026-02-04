@@ -4,7 +4,7 @@ function rgbToHex(r: number, g: number, b: number) {
     return "#" + ((1 << 24) + ((r * 255) | 0) * 65536 + ((g * 255) | 0) * 256 + ((b * 255) | 0)).toString(16).slice(1).toUpperCase();
 }
 
-function resolveColorFromVariable(variable: Variable): string | null {
+async function resolveColorFromVariable(variable: Variable): Promise<string | null> {
     try {
         // Resolve for current context (first selection or page)
         const context = figma.currentPage.selection[0] || figma.currentPage;
@@ -12,9 +12,9 @@ function resolveColorFromVariable(variable: Variable): string | null {
 
         if ((value as any).type === "VARIABLE_ALIAS") {
             const aliasId = (value as any).id;
-            const aliasedVar = figma.variables.getVariableById(aliasId);
+            const aliasedVar = await figma.variables.getVariableByIdAsync(aliasId);
             if (aliasedVar) {
-                return resolveColorFromVariable(aliasedVar);
+                return await resolveColorFromVariable(aliasedVar);
             }
         } else if (typeof value === "object" && "r" in (value as any)) {
             const { r, g, b } = value as RGB;
@@ -26,36 +26,37 @@ function resolveColorFromVariable(variable: Variable): string | null {
     return null;
 }
 
-function getLocalColorAssets() {
-    const styles = figma.getLocalPaintStyles();
-    const variables = figma.variables.getLocalVariables("COLOR");
+async function getLocalColorAssets() {
+    const styles = await figma.getLocalPaintStylesAsync();
+    const variables = await figma.variables.getLocalVariablesAsync("COLOR");
 
-    const assets = [
-        ...styles.map(s => {
-            let hex = "#CCCCCC";
-            if (s.paints[0] && s.paints[0].type === "SOLID") {
-                const { r, g, b } = s.paints[0].color;
-                hex = rgbToHex(r, g, b);
-            }
+    const styleAssets = styles.map(s => {
+        let hex = "#CCCCCC";
+        if (s.paints[0] && s.paints[0].type === "SOLID") {
+            const { r, g, b } = s.paints[0].color;
+            hex = rgbToHex(r, g, b);
+        }
 
-            const parts = s.name.split("/");
-            const group = parts.length > 1 ? parts[0].trim() : "Other";
-            const name = parts.length > 1 ? parts.slice(1).join("/").trim() : s.name;
+        const parts = s.name.split("/");
+        const group = parts.length > 1 ? parts[0].trim() : "Other";
+        const name = parts.length > 1 ? parts.slice(1).join("/").trim() : s.name;
 
-            return { id: s.id, name, group, type: "STYLE", hex };
-        }),
-        ...variables.map(v => {
-            // For variables, we might not get a resolved color easily without context.
-            // Use a placeholder or attempt basic resolution if possible, but keeping it simple/safe is better.
-            const parts = v.name.split("/");
-            const group = parts.length > 1 ? parts[0].trim() : "Other";
-            const name = parts.length > 1 ? parts.slice(1).join("/").trim() : v.name;
+        return { id: s.id, name, group, type: "STYLE", hex };
+    });
 
-            const hex = resolveColorFromVariable(v);
+    const variableAssets = await Promise.all(variables.map(async v => {
+        // For variables, we might not get a resolved color easily without context.
+        // Use a placeholder or attempt basic resolution if possible, but keeping it simple/safe is better.
+        const parts = v.name.split("/");
+        const group = parts.length > 1 ? parts[0].trim() : "Other";
+        const name = parts.length > 1 ? parts.slice(1).join("/").trim() : v.name;
 
-            return { id: v.id, name, group, type: "VARIABLE", hex };
-        })
-    ];
+        const hex = await resolveColorFromVariable(v);
+
+        return { id: v.id, name, group, type: "VARIABLE", hex };
+    }));
+
+    const assets = [...styleAssets, ...variableAssets];
 
     // Sort by Group then Name
     assets.sort((a, b) => {
@@ -76,8 +77,11 @@ function sendSelectionCount() {
 }
 
 // Initial count and assets
+// Initial count and assets
 sendSelectionCount();
-getLocalColorAssets();
+(async () => {
+    await getLocalColorAssets();
+})();
 
 // Listen for selection changes
 figma.on("selectionchange", sendSelectionCount);
@@ -91,7 +95,7 @@ function hexToRgb(hex: string) {
     } : null;
 }
 
-figma.ui.onmessage = msg => {
+figma.ui.onmessage = async msg => {
     if (msg.type === 'standardize-selection') {
         const selection = figma.currentPage.selection;
 
@@ -170,13 +174,13 @@ figma.ui.onmessage = msg => {
                         }
                     } else if (colorOptions.mode === 'STYLE' && val) {
                         // Try Style first
-                        const style = figma.getStyleById(val);
+                        const style = await figma.getStyleByIdAsync(val);
                         if (style) {
                             flattened.fillStyleId = style.id;
                         } else {
                             // Try Variable
                             try {
-                                const variable = figma.variables.getVariableById(val);
+                                const variable = await figma.variables.getVariableByIdAsync(val);
                                 if (variable) {
                                     const currentFills = (flattened.fills as Paint[]).length > 0 ? [...(flattened.fills as Paint[])] : [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
                                     if (currentFills[0].type === "SOLID") {

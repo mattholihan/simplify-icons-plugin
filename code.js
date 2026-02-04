@@ -1,35 +1,46 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 figma.showUI(__html__, { width: 400, height: 600, themeColors: true });
 function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + ((r * 255) | 0) * 65536 + ((g * 255) | 0) * 256 + ((b * 255) | 0)).toString(16).slice(1).toUpperCase();
 }
 function resolveColorFromVariable(variable) {
-    try {
-        // Resolve for current context (first selection or page)
-        const context = figma.currentPage.selection[0] || figma.currentPage;
-        const { value } = variable.resolveForConsumer(context);
-        if (value.type === "VARIABLE_ALIAS") {
-            const aliasId = value.id;
-            const aliasedVar = figma.variables.getVariableById(aliasId);
-            if (aliasedVar) {
-                return resolveColorFromVariable(aliasedVar);
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // Resolve for current context (first selection or page)
+            const context = figma.currentPage.selection[0] || figma.currentPage;
+            const { value } = variable.resolveForConsumer(context);
+            if (value.type === "VARIABLE_ALIAS") {
+                const aliasId = value.id;
+                const aliasedVar = yield figma.variables.getVariableByIdAsync(aliasId);
+                if (aliasedVar) {
+                    return yield resolveColorFromVariable(aliasedVar);
+                }
+            }
+            else if (typeof value === "object" && "r" in value) {
+                const { r, g, b } = value;
+                return rgbToHex(r, g, b);
             }
         }
-        else if (typeof value === "object" && "r" in value) {
-            const { r, g, b } = value;
-            return rgbToHex(r, g, b);
+        catch (e) {
+            // console.error("Failed to resolve variable", variable.name, e);
         }
-    }
-    catch (e) {
-        // console.error("Failed to resolve variable", variable.name, e);
-    }
-    return null;
+        return null;
+    });
 }
 function getLocalColorAssets() {
-    const styles = figma.getLocalPaintStyles();
-    const variables = figma.variables.getLocalVariables("COLOR");
-    const assets = [
-        ...styles.map(s => {
+    return __awaiter(this, void 0, void 0, function* () {
+        const styles = yield figma.getLocalPaintStylesAsync();
+        const variables = yield figma.variables.getLocalVariablesAsync("COLOR");
+        const styleAssets = styles.map(s => {
             let hex = "#CCCCCC";
             if (s.paints[0] && s.paints[0].type === "SOLID") {
                 const { r, g, b } = s.paints[0].color;
@@ -39,30 +50,31 @@ function getLocalColorAssets() {
             const group = parts.length > 1 ? parts[0].trim() : "Other";
             const name = parts.length > 1 ? parts.slice(1).join("/").trim() : s.name;
             return { id: s.id, name, group, type: "STYLE", hex };
-        }),
-        ...variables.map(v => {
+        });
+        const variableAssets = yield Promise.all(variables.map((v) => __awaiter(this, void 0, void 0, function* () {
             // For variables, we might not get a resolved color easily without context.
             // Use a placeholder or attempt basic resolution if possible, but keeping it simple/safe is better.
             const parts = v.name.split("/");
             const group = parts.length > 1 ? parts[0].trim() : "Other";
             const name = parts.length > 1 ? parts.slice(1).join("/").trim() : v.name;
-            const hex = resolveColorFromVariable(v);
+            const hex = yield resolveColorFromVariable(v);
             return { id: v.id, name, group, type: "VARIABLE", hex };
-        })
-    ];
-    // Sort by Group then Name
-    assets.sort((a, b) => {
-        if (a.group < b.group)
-            return -1;
-        if (a.group > b.group)
-            return 1;
-        if (a.name < b.name)
-            return -1;
-        if (a.name > b.name)
-            return 1;
-        return 0;
+        })));
+        const assets = [...styleAssets, ...variableAssets];
+        // Sort by Group then Name
+        assets.sort((a, b) => {
+            if (a.group < b.group)
+                return -1;
+            if (a.group > b.group)
+                return 1;
+            if (a.name < b.name)
+                return -1;
+            if (a.name > b.name)
+                return 1;
+            return 0;
+        });
+        figma.ui.postMessage({ type: 'color-assets', assets });
     });
-    figma.ui.postMessage({ type: 'color-assets', assets });
 }
 function sendSelectionCount() {
     const selection = figma.currentPage.selection;
@@ -70,8 +82,11 @@ function sendSelectionCount() {
     figma.ui.postMessage({ type: 'selection-updated', count: count });
 }
 // Initial count and assets
+// Initial count and assets
 sendSelectionCount();
-getLocalColorAssets();
+(() => __awaiter(void 0, void 0, void 0, function* () {
+    yield getLocalColorAssets();
+}))();
 // Listen for selection changes
 figma.on("selectionchange", sendSelectionCount);
 function hexToRgb(hex) {
@@ -82,7 +97,7 @@ function hexToRgb(hex) {
         b: parseInt(result[3], 16) / 255
     } : null;
 }
-figma.ui.onmessage = msg => {
+figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
     if (msg.type === 'standardize-selection') {
         const selection = figma.currentPage.selection;
         if (selection.length === 0) {
@@ -148,14 +163,14 @@ figma.ui.onmessage = msg => {
                     }
                     else if (colorOptions.mode === 'STYLE' && val) {
                         // Try Style first
-                        const style = figma.getStyleById(val);
+                        const style = yield figma.getStyleByIdAsync(val);
                         if (style) {
                             flattened.fillStyleId = style.id;
                         }
                         else {
                             // Try Variable
                             try {
-                                const variable = figma.variables.getVariableById(val);
+                                const variable = yield figma.variables.getVariableByIdAsync(val);
                                 if (variable) {
                                     const currentFills = flattened.fills.length > 0 ? [...flattened.fills] : [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
                                     if (currentFills[0].type === "SOLID") {
@@ -191,4 +206,4 @@ figma.ui.onmessage = msg => {
             figma.notify("No standardizable icons found in selection.", { error: true });
         }
     }
-};
+});
