@@ -1,6 +1,6 @@
-# Standardize Icons 🛠️
+# Simplify Icons 🛠️
 
-**Standardize Icons** is a Figma plugin designed to solve the age-old problem of "broken icon colors." It automates the tedious process of normalizing layer structures, naming, and constraints so that your color overrides stay preserved during instance swapping.
+**Simplify Icons** is a Figma plugin designed to solve the age-old problem of "broken icon colors." It automates the tedious process of normalizing layer structures, naming, and constraints so that your color overrides stay preserved during instance swapping.
 
 ## 🚀 Why this exists
 In Figma, color overrides only persist if the layer names and hierarchies are identical between components. Most icon sets (including Material Symbols) come with messy groupings or inconsistent naming. This plugin fixes that in a single click.
