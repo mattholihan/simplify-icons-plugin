@@ -38,41 +38,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Header */
-        .header {
-            background-color: var(--color-brand);
-            color: var(--color-text-inverse);
-            height: 56px;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            box-sizing: border-box;
-        }
-
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 16px;
-            font-weight: 400;
-            /* Regular per design */
-        }
-
-        .logo-placeholder {
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: black;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
         /* Scrollable Body */
         .content-scroll {
             flex-grow: 1;
@@ -87,7 +52,7 @@
         }
 
         h1 {
-            font-size: 20px;
+            font-size: 24px;
             /* Assuming roughly Heading Base */
             font-weight: 600;
             margin: 0 0 8px 0;
@@ -97,8 +62,8 @@
         p {
             font-size: 16px;
             /* Body Base */
-            line-height: 1.4;
-            color: var(--color-text-secondary);
+            line-height: 1.5;
+            color: var(--color-text);
             margin: 0;
         }
 
@@ -129,8 +94,8 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 0 16px;
-            height: 48px;
+            padding: 0 12px;
+            height: 40px;
             border: 1px solid var(--color-border-inactive);
             border-radius: var(--radius-m);
             cursor: pointer;
@@ -154,8 +119,8 @@
         }
 
         .radio-icon {
-            width: 24px;
-            height: 24px;
+            width: 16px;
+            height: 16px;
             flex-shrink: 0;
         }
 
@@ -167,8 +132,8 @@
         /* Input Fields (Hex/Search) */
         input[type="text"] {
             width: 100%;
-            height: 48px;
-            padding: 0 16px;
+            height: 40px;
+            padding: 0 12px;
             border: 1px solid var(--color-border-inactive);
             border-radius: var(--radius-m);
             font-family: 'Inter', sans-serif;
@@ -179,10 +144,14 @@
             color: var(--color-text);
         }
 
+        input[type="text"]:hover {
+            border-color: var(--color-text);
+        }
+
         input[type="text"]:focus {
             border-color: var(--color-brand);
             border-width: 2px;
-            padding-left: 15px;
+            padding-left: 11px;
             /* Adjust for width change to prevent layout shift */
         }
 
@@ -198,11 +167,13 @@
         }
 
         .color-group {
-            background: var(--color-bg-secondary);
-            padding: 8px 16px;
+            background: var(--color-brand);
+            align-content: center;
+            height: 40px;
+            padding: 0px 12px;
             font-size: 12px;
             font-weight: 600;
-            color: var(--color-text-secondary);
+            color: var(--color-text-inverse);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             position: sticky;
@@ -210,10 +181,12 @@
         }
 
         .color-item {
-            padding: 10px 16px;
+            align-content: center;
+            height: 40px;
+            padding: 0px 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             cursor: pointer;
             border-bottom: 1px solid var(--color-bg-secondary);
         }
@@ -229,7 +202,7 @@
         .color-item.selected {
             background-color: #E8E8E8;
             /* Slightly darker than hover */
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .swatch {
@@ -267,7 +240,7 @@
 
         button {
             width: 100%;
-            height: 48px;
+            height: 40px;
             background-color: var(--color-brand);
             color: var(--color-text-inverse);
             border: none;
@@ -301,6 +274,63 @@
             cursor: not-allowed;
             box-shadow: none;
         }
+
+        /* Custom Checkbox */
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--color-border-inactive);
+            border-radius: 4px;
+            background-color: var(--color-bg);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.1s ease;
+            flex-shrink: 0;
+            margin: 0;
+        }
+
+        input[type="checkbox"]:hover {
+            border-color: var(--color-text);
+        }
+
+        input[type="checkbox"]:checked {
+            border-color: var(--color-brand);
+            background-color: var(--color-brand);
+            background-image: url("data:image/svg+xml,%3Csvg width='10' height='8' viewBox='0 0 10 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 4L3.5 6.5L9 1' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            box-shadow: inset 0 0 0 1px var(--color-brand);
+        }
+
+        /* Toggle Tile */
+        .toggle-tile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 12px;
+            height: 40px;
+            border: 1px solid var(--color-border-inactive);
+            border-radius: var(--radius-m);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            user-select: none;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .toggle-tile:hover {
+            border-color: var(--color-text);
+        }
+
+        /* Active state for Toggle Tile */
+        .toggle-tile:has(input:checked) {
+            border: 1px solid var(--color-brand);
+            box-shadow: inset 0 0 0 1px var(--color-brand);
+        }
     </style>
 </head>
 
@@ -313,7 +343,30 @@
 
         <div style="margin-top: 0;">
             <h1>Standardize Icons</h1>
-            <p>Standardize icon structures for perfect instance swapping</p>
+            <p>Standardize icons for perfect instance swapping</p>
+        </div>
+
+        <!-- Dimensions Section -->
+        <div>
+            <span class="label">Resize Icon</span>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label class="toggle-tile">
+                    <input type="checkbox" id="size-checkbox">
+                    <span style="font-size: 16px;">Target size</span>
+                </label>
+
+                <div id="dimensions-input-container" style="display: none; padding-left: 12px; margin-bottom: 4px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="color: var(--color-text-secondary); font-size: 14px;">Px</span>
+                        <input type="number" id="size-input" value="24" style="width: 80px;" min="1">
+                    </div>
+                </div>
+
+                <label class="toggle-tile">
+                    <input type="checkbox" id="outline-checkbox" checked>
+                    <span style="font-size: 16px;">Outline stroke</span>
+                </label>
+            </div>
         </div>
 
         <div>
@@ -368,37 +421,12 @@
             </div>
         </div>
 
-        <!-- Dimensions Section -->
-        <div>
-            <span class="label">Dimensions</span>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <input type="checkbox" id="size-checkbox" style="width: 16px; height: 16px;">
-                        <span style="font-size: 16px; color: var(--color-text);">Resize to target size</span>
-                    </label>
-                </div>
-                <div id="dimensions-input-container" style="display: none; padding-left: 24px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="color: var(--color-text-secondary); font-size: 14px;">Px</span>
-                        <input type="number" id="size-input" value="24" style="width: 80px;" min="1">
-                    </div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <input type="checkbox" id="outline-checkbox" checked style="width: 16px; height: 16px;">
-                        <span style="font-size: 16px; color: var(--color-text);">Outline strokes</span>
-                    </label>
-                </div>
-            </div>
-        </div>
-
         <!-- Section: Hex -->
         <div id="section-hex" class="content-section">
             <span class="label">Custom Hex Color</span>
-            <div style="display:flex; gap:12px; align-items:center;">
+            <div style="display:flex; gap:8px; align-items:center;">
                 <div id="hexPreview"
-                    style="width:48px; height:48px; border-radius:8px; border:1px solid var(--color-border-inactive); background:#000000; flex-shrink:0;">
+                    style="width:40px; height:40px; border-radius:100%; border:1px solid var(--color-border-inactive); background:#000000; flex-shrink:0;">
                 </div>
                 <input type="text" id="hexInput" placeholder="#000000" value="#000000">
             </div>
