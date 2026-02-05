@@ -371,16 +371,24 @@
         <!-- Dimensions Section -->
         <div>
             <span class="label">Dimensions</span>
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" id="size-checkbox" style="width: 16px; height: 16px;">
-                    <span style="font-size: 16px; color: var(--color-text);">Resize to target size</span>
-                </label>
-            </div>
-            <div id="dimensions-input-container" style="margin-top: 8px; display: none;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: var(--color-text-secondary); font-size: 14px;">Px</span>
-                    <input type="number" id="size-input" value="24" style="width: 80px;" min="1">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="size-checkbox" style="width: 16px; height: 16px;">
+                        <span style="font-size: 16px; color: var(--color-text);">Resize to target size</span>
+                    </label>
+                </div>
+                <div id="dimensions-input-container" style="display: none; padding-left: 24px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="color: var(--color-text-secondary); font-size: 14px;">Px</span>
+                        <input type="number" id="size-input" value="24" style="width: 80px;" min="1">
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="outline-checkbox" checked style="width: 16px; height: 16px;">
+                        <span style="font-size: 16px; color: var(--color-text);">Outline strokes</span>
+                    </label>
                 </div>
             </div>
         </div>
@@ -426,6 +434,7 @@
         const sizeCheckbox = document.getElementById('size-checkbox');
         const sizeInput = document.getElementById('size-input');
         const dimensionsContainer = document.getElementById('dimensions-input-container');
+        const outlineCheckbox = document.getElementById('outline-checkbox');
 
         let allAssets = [];
         let selectedAssetId = null;
@@ -572,6 +581,7 @@
 
             const shouldResize = sizeCheckbox.checked;
             const targetSize = parseInt(sizeInput.value, 10);
+            const shouldOutline = outlineCheckbox.checked;
 
             parent.postMessage({
                 pluginMessage: {
@@ -581,7 +591,8 @@
                         value: colorValue
                     },
                     shouldResize: shouldResize,
-                    targetSize: targetSize
+                    targetSize: targetSize,
+                    shouldOutline: shouldOutline
                 }
             }, '*');
         }

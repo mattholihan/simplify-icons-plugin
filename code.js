@@ -147,30 +147,34 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
                 n.type === "TEXT");
             if (vectorNodes.length > 0) {
                 // Outline strokes before flattening to ensure proper scaling
+                const shouldOutline = msg.shouldOutline !== false; // Default true if undefined
                 const nodesToFlatten = [];
                 for (const vNode of vectorNodes) {
                     let nodeProcessed = false;
-                    // Check if node has strokes (handle figma.mixed for strokeWeight)
-                    if ('strokes' in vNode &&
-                        vNode.strokes.length > 0 &&
-                        'strokeWeight' in vNode &&
-                        vNode.strokeWeight !== figma.mixed &&
-                        vNode.strokeWeight > 0) {
-                        try {
-                            // Cast to any to access outlineStroke safely
-                            const nodeWithOutline = vNode;
-                            if (typeof nodeWithOutline.outlineStroke === 'function') {
-                                const outlined = nodeWithOutline.outlineStroke();
-                                if (outlined) {
-                                    nodesToFlatten.push(outlined);
-                                    // Remove the original stroked node to prevent duplicates
-                                    vNode.remove();
-                                    nodeProcessed = true;
+                    // Only run outline logic if requested
+                    if (shouldOutline) {
+                        // Check if node has strokes (handle figma.mixed for strokeWeight)
+                        if ('strokes' in vNode &&
+                            vNode.strokes.length > 0 &&
+                            'strokeWeight' in vNode &&
+                            vNode.strokeWeight !== figma.mixed &&
+                            vNode.strokeWeight > 0) {
+                            try {
+                                // Cast to any to access outlineStroke safely
+                                const nodeWithOutline = vNode;
+                                if (typeof nodeWithOutline.outlineStroke === 'function') {
+                                    const outlined = nodeWithOutline.outlineStroke();
+                                    if (outlined) {
+                                        nodesToFlatten.push(outlined);
+                                        // Remove the original stroked node to prevent duplicates
+                                        vNode.remove();
+                                        nodeProcessed = true;
+                                    }
                                 }
                             }
-                        }
-                        catch (e) {
-                            // Fallback if outlining fails
+                            catch (e) {
+                                // Fallback if outlining fails
+                            }
                         }
                     }
                     if (!nodeProcessed) {
