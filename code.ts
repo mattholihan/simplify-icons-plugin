@@ -265,11 +265,11 @@ figma.ui.onmessage = async msg => {
             }
         }
         if (count > 0) {
-            figma.notify(`Standardized ${count} ${count === 1 ? 'icon' : 'icons'} successfully!`, { timeout: 2000 });
+            figma.notify(`Simplified ${count} ${count === 1 ? 'icon' : 'icons'} successfully!`, { timeout: 2000 });
         } else {
             // Only notify if we didn't exit early (which we do for 0 selection)
             // But if selection was >0 but no valid icons found:
-            figma.notify("No standardizable icons found in selection.", { error: true });
+            figma.notify("No icons found in selection.", { error: true });
         }
     }
 };
