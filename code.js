@@ -146,11 +146,46 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
                 n.type === "BOOLEAN_OPERATION" ||
                 n.type === "TEXT");
             if (vectorNodes.length > 0) {
+                // Outline strokes before flattening to ensure proper scaling
+                const nodesToFlatten = [];
+                for (const vNode of vectorNodes) {
+                    let nodeProcessed = false;
+                    // Check if node has strokes (handle figma.mixed for strokeWeight)
+                    if ('strokes' in vNode &&
+                        vNode.strokes.length > 0 &&
+                        'strokeWeight' in vNode &&
+                        vNode.strokeWeight !== figma.mixed &&
+                        vNode.strokeWeight > 0) {
+                        try {
+                            // Cast to any to access outlineStroke safely
+                            const nodeWithOutline = vNode;
+                            if (typeof nodeWithOutline.outlineStroke === 'function') {
+                                const outlined = nodeWithOutline.outlineStroke();
+                                if (outlined) {
+                                    nodesToFlatten.push(outlined);
+                                    // Remove the original stroked node to prevent duplicates
+                                    vNode.remove();
+                                    nodeProcessed = true;
+                                }
+                            }
+                        }
+                        catch (e) {
+                            // Fallback if outlining fails
+                        }
+                    }
+                    if (!nodeProcessed) {
+                        nodesToFlatten.push(vNode);
+                    }
+                }
                 // Flatten them
-                const flattened = figma.flatten(vectorNodes, node);
+                const flattened = figma.flatten(nodesToFlatten, node);
                 // Rename
                 flattened.name = "Vector";
+                // Center the vector within the frame
+                flattened.x = (node.width - flattened.width) / 2;
+                flattened.y = (node.height - flattened.height) / 2;
                 // Set constraints (SCALE preserves relative position/size)
+                // Important: Set this AFTER centering so it scales from the center
                 flattened.constraints = { horizontal: "SCALE", vertical: "SCALE" };
                 // Apply Color Logic
                 if (colorOptions && colorOptions.mode !== 'ORIGINAL') {
@@ -184,6 +219,15 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
                             }
                         }
                     }
+                }
+                // Handle Resizing
+                const shouldResize = msg.shouldResize;
+                const targetSize = msg.targetSize;
+                if (shouldResize && targetSize && targetSize > 0) {
+                    console.log(`Resizing node to ${targetSize}x${targetSize}`);
+                    // Resize the container frame
+                    // Constraints are already set to SCALE above, so the vector will adjust proportionally
+                    node.resize(targetSize, targetSize);
                 }
                 // Cleanup: Remove original group if it exists
                 if (item.originalGroup && !item.originalGroup.removed) {
