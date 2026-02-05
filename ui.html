@@ -129,8 +129,9 @@
             font-weight: 400;
         }
 
-        /* Input Fields (Hex/Search) */
-        input[type="text"] {
+        /* Input Fields (Hex/Search/Number) */
+        input[type="text"],
+        input[type="number"] {
             width: 100%;
             height: 40px;
             padding: 0 12px;
@@ -144,11 +145,13 @@
             color: var(--color-text);
         }
 
-        input[type="text"]:hover {
+        input[type="text"]:hover,
+        input[type="number"]:hover {
             border-color: var(--color-text);
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus,
+        input[type="number"]:focus {
             border-color: var(--color-brand);
             border-width: 2px;
             padding-left: 11px;
@@ -350,22 +353,26 @@
         <div>
             <span class="label">Resize Icon</span>
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <label class="toggle-tile">
-                    <input type="checkbox" id="size-checkbox">
-                    <span style="font-size: 16px;">Target size</span>
-                </label>
-
-                <div id="dimensions-input-container" style="display: none; padding-left: 12px; margin-bottom: 4px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="color: var(--color-text-secondary); font-size: 14px;">Px</span>
-                        <input type="number" id="size-input" value="24" style="width: 80px;" min="1">
-                    </div>
-                </div>
 
                 <label class="toggle-tile">
                     <input type="checkbox" id="outline-checkbox" checked>
                     <span style="font-size: 16px;">Outline stroke</span>
                 </label>
+
+                <label class="toggle-tile">
+                    <input type="checkbox" id="size-checkbox">
+                    <span style="font-size: 16px;">Target size</span>
+                </label>
+
+                <div id="dimensions-input-container" style="display: none;">
+                    <div style="position: relative; width: 112px;">
+                        <input type="number" id="size-input" value="24" style="width: 100%; padding-right: 32px;"
+                            min="1">
+                        <span
+                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-secondary); font-size: 14px; pointer-events: none;">px</span>
+                    </div>
+                </div>
+
             </div>
         </div>
 
