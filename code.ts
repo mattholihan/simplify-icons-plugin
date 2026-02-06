@@ -80,9 +80,9 @@ async function getDimensionVariables() {
 
         const resolvedAssets = variables
             .filter(v => {
-                // Broad Filter: Include if scoped to Width/Height, OR if it has 'All Scopes' (empty array)
-                return v.scopes.length === 0 ||
-                    v.scopes.includes('WIDTH_HEIGHT') ||
+                console.log(`Variable: ${v.name} | Scopes: ${v.scopes.join(', ') || 'All Scopes'}`);
+                // Strict Filter: Only include if explicitly scoped to Width/Height or ALL_SCOPES
+                return v.scopes.includes('WIDTH_HEIGHT') ||
                     v.scopes.includes('ALL_SCOPES');
             })
             .map(v => {
