@@ -408,6 +408,40 @@
             border: 1px solid var(--figma-color-border) !important;
             box-shadow: inset 0 0 0 1px var(--figma-color-border) !important;
         }
+
+        /* New Variable Chip Container */
+        .variable-chip-container {
+            width: 100%;
+            height: 40px;
+            /* Match input height */
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border-inactive);
+            border-radius: var(--radius-m);
+            display: flex;
+            /* overridden by inline style when toggled, but good default */
+            align-items: center;
+            padding: 0 12px;
+            box-sizing: border-box;
+            cursor: default;
+            justify-content: space-between;
+        }
+
+        .chip-clear-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-text-secondary);
+            border-radius: 4px;
+            transition: all 0.1s ease;
+        }
+
+        .chip-clear-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: var(--color-text);
+        }
     </style>
 </head>
 
@@ -441,20 +475,26 @@
                 <div id="dimensions-input-container" style="display: none;">
                     <div class="size-input-row">
                         <div style="position: relative; width: 100%;">
-                            <input type="number" id="size-input" value="24" style="width: 100%; padding-right: 32px;"
-                                min="1">
-                            <span id="px-suffix"
-                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-secondary); font-size: 14px; pointer-events: none;">px</span>
+                            <!-- Manual Mode -->
+                            <div id="manual-size-container" style="position: relative; width: 100%;">
+                                <input type="number" id="size-input" value="24"
+                                    style="width: 100%; padding-right: 32px;" min="1">
+                                <span id="px-suffix"
+                                    style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-secondary); font-size: 14px; pointer-events: none;">px</span>
+                            </div>
 
-                            <!-- Variable Chip -->
-                            <div id="variable-chip" class="variable-chip" style="display: none;">
-                                <svg width="16" height="16" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M10 2.5L16.0622 6V13L10 16.5L3.93782 13V6L10 2.5Z" stroke="#1E1E1E"
-                                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                                <span id="variable-chip-text"
-                                    style="padding-left: 8px; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; font-weight: 500;">Variable</span>
+                            <!-- Variable Mode -->
+                            <div id="variable-chip-container" class="variable-chip-container" style="display: none;">
+                                <div
+                                    style="display: flex; align-items: center; gap: 8px; flex-grow: 1; overflow: hidden;">
+                                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M10 2.5L16.0622 6V13L10 16.5L3.93782 13V6L10 2.5Z" stroke="#1E1E1E"
+                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span id="variable-chip-text"
+                                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; font-weight: 500;">Variable</span>
+                                </div>
                                 <div id="variable-chip-clear" class="chip-clear-btn" title="Clear variable">
                                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
@@ -588,8 +628,8 @@
 
         const variableToggleBtn = document.getElementById('variable-toggle-btn');
         const variableDropdown = document.getElementById('variable-dropdown');
-        const pxSuffix = document.getElementById('px-suffix');
-        const variableChip = document.getElementById('variable-chip');
+        const manualSizeContainer = document.getElementById('manual-size-container');
+        const variableChipContainer = document.getElementById('variable-chip-container');
         const variableChipText = document.getElementById('variable-chip-text');
         const variableChipClear = document.getElementById('variable-chip-clear');
 
@@ -661,22 +701,22 @@
             if (variable) {
                 selectedDimensionVariableId = variable.id;
 
-                // Show Chip
-                variableChip.style.display = 'flex';
+                // Show Chip Container
+                variableChipContainer.style.display = 'flex';
                 variableChipText.textContent = variable.name;
 
-                // Hide Manual Input visual elements
-                pxSuffix.style.display = 'none';
+                // Hide Manual Input Container
+                manualSizeContainer.style.display = 'none';
 
             } else {
-                // Reset to Manual
+                // Return to Manual
                 selectedDimensionVariableId = null;
 
-                // Hide Chip
-                variableChip.style.display = 'none';
+                // Hide Chip Container
+                variableChipContainer.style.display = 'none';
 
-                // Show Manual Input visual elements
-                pxSuffix.style.display = 'block';
+                // Show Manual Input Container
+                manualSizeContainer.style.display = 'block';
             }
 
             variableDropdown.style.display = 'none';
