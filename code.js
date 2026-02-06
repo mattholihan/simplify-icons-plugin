@@ -269,11 +269,31 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
                 // Handle Resizing
                 const shouldResize = msg.shouldResize;
                 const targetSize = msg.targetSize;
-                if (shouldResize && targetSize && targetSize > 0) {
-                    console.log(`Resizing node to ${targetSize}x${targetSize}`);
-                    // Resize the container frame
-                    // Constraints are already set to SCALE above, so the vector will adjust proportionally
-                    node.resize(targetSize, targetSize);
+                const targetSizeVariableId = msg.targetSizeVariableId;
+                if (shouldResize) {
+                    if (targetSizeVariableId) {
+                        try {
+                            const variable = yield figma.variables.getVariableByIdAsync(targetSizeVariableId);
+                            if (variable) {
+                                console.log(`Applying variable ${variable.name} to dimensions`);
+                                // Set bound variable for width and height
+                                node.setBoundVariable('width', variable.id);
+                                node.setBoundVariable('height', variable.id);
+                                // Note: We might also want to set the explicit size for the current mode if not automatically handled,
+                                // but binding usually handles it. If it doesn't update visual size immediately in some contexts, explicit resize matches resolves value.
+                                // However, setBoundVariable is primary.
+                            }
+                        }
+                        catch (e) {
+                            console.error("Failed to apply dimension variable", e);
+                        }
+                    }
+                    else if (targetSize && targetSize > 0) {
+                        console.log(`Resizing node to ${targetSize}x${targetSize}`);
+                        // Resize the container frame
+                        // Constraints are already set to SCALE above, so the vector will adjust proportionally
+                        node.resize(targetSize, targetSize);
+                    }
                 }
                 // Cleanup: Remove original group if it exists
                 if (item.originalGroup && !item.originalGroup.removed) {

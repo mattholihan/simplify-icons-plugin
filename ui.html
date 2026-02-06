@@ -333,6 +333,81 @@
             border: 1px solid var(--color-brand);
             box-shadow: inset 0 0 0 1px var(--color-brand);
         }
+
+        /* Variable Dropdown UI */
+        .size-input-row {
+            display: flex;
+            gap: 8px;
+            position: relative;
+            width: 100%;
+        }
+
+        .variable-btn {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid var(--color-border-inactive);
+            border-radius: var(--radius-m);
+            cursor: pointer;
+            box-shadow: none;
+            transition: all 0.1s ease;
+        }
+
+        .variable-btn:hover {
+            border-color: var(--color-text);
+        }
+
+        .variable-btn svg path {
+            stroke: var(--color-text);
+        }
+
+        #variable-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            z-index: 99999;
+            background: white;
+            border: 1px solid var(--color-border-inactive);
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 4px;
+        }
+
+        .variable-item {
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .variable-item:hover {
+            background-color: var(--color-bg-secondary);
+        }
+
+        /* Chip State for Input */
+        .chip-input {
+            background-color: var(--color-bg-secondary) !important;
+            border-color: transparent !important;
+            color: var(--color-text) !important;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .chip-input:focus {
+            border: 1px solid var(--figma-color-border) !important;
+            box-shadow: inset 0 0 0 1px var(--figma-color-border) !important;
+        }
     </style>
 </head>
 
@@ -364,11 +439,25 @@
                 </label>
 
                 <div id="dimensions-input-container" style="display: none;">
-                    <div style="position: relative; width: 112px;">
-                        <input type="number" id="size-input" value="24" style="width: 100%; padding-right: 32px;"
-                            min="1">
-                        <span
-                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-secondary); font-size: 14px; pointer-events: none;">px</span>
+                    <div class="size-input-row">
+                        <div style="position: relative; width: 100%;">
+                            <input type="number" id="size-input" value="24" style="width: 100%; padding-right: 32px;"
+                                min="1">
+                            <span id="px-suffix"
+                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-secondary); font-size: 14px; pointer-events: none;">px</span>
+                        </div>
+
+                        <button id="variable-toggle-btn" class="variable-btn" title="Select variable">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 2.5L16.0622 6V13L10 16.5L3.93782 13V6L10 2.5Z" stroke="currentColor"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+
+                        <div id="variable-dropdown">
+                            <!-- Populated by JS -->
+                        </div>
                     </div>
                 </div>
 
@@ -479,10 +568,91 @@
         let selectedAssetId = null;
         let activeStrategy = 'ORIGINAL';
 
+        const variableToggleBtn = document.getElementById('variable-toggle-btn');
+        const variableDropdown = document.getElementById('variable-dropdown');
+        const pxSuffix = document.getElementById('px-suffix');
+
+        let allDimensionVariables = [];
+        let selectedDimensionVariableId = null;
+
         // Dimensions Logic
         sizeCheckbox.onchange = () => {
             dimensionsContainer.style.display = sizeCheckbox.checked ? 'block' : 'none';
         };
+
+        // Variable Dropdown Logic
+        variableToggleBtn.onclick = (e) => {
+            e.stopPropagation(); // Prevent immediate close
+            const isVisible = variableDropdown.style.display === 'block';
+            variableDropdown.style.display = isVisible ? 'none' : 'block';
+        };
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', (e) => {
+            if (!variableDropdown.contains(e.target) && e.target !== variableToggleBtn && !variableToggleBtn.contains(e.target)) {
+                variableDropdown.style.display = 'none';
+            }
+        });
+
+        function populateVariableDropdown() {
+            variableDropdown.innerHTML = '';
+
+            if (allDimensionVariables.length === 0) {
+                const div = document.createElement('div');
+                div.style.padding = "12px";
+                div.style.color = "var(--color-text-secondary)";
+                div.style.fontSize = "14px";
+                div.textContent = "No number variables found";
+                variableDropdown.appendChild(div);
+                return;
+            }
+
+            // Optional: Add "Detach / Manual" option if a variable is currently selected
+            if (selectedDimensionVariableId) {
+                const manualItem = document.createElement('div');
+                manualItem.className = 'variable-item';
+                manualItem.innerHTML = '<span>Manual Value</span><span>—</span>';
+                manualItem.onclick = () => {
+                    selectDimensionVariable(null);
+                };
+                variableDropdown.appendChild(manualItem);
+            }
+
+            allDimensionVariables.forEach(v => {
+                const item = document.createElement('div');
+                item.className = 'variable-item';
+                item.innerHTML = `<span>${v.name}</span><span style="color: var(--color-text-secondary);">${v.value}</span>`;
+                item.onclick = () => {
+                    selectDimensionVariable(v);
+                };
+                variableDropdown.appendChild(item);
+            });
+        }
+
+        function selectDimensionVariable(variable) {
+            if (variable) {
+                selectedDimensionVariableId = variable.id;
+
+                // Switch input to text mode (Chip)
+                sizeInput.type = 'text';
+                sizeInput.value = variable.name;
+                sizeInput.readOnly = true;
+                sizeInput.classList.add('chip-input');
+                pxSuffix.style.display = 'none';
+
+            } else {
+                // Reset to Manual
+                selectedDimensionVariableId = null;
+                sizeInput.type = 'number';
+                sizeInput.value = '24'; // Default or keep previous manual value? Resetting is safer for now.
+                sizeInput.readOnly = false;
+                sizeInput.classList.remove('chip-input');
+                pxSuffix.style.display = 'block';
+            }
+
+            variableDropdown.style.display = 'none';
+        }
+
 
         // Initialize Radio Visuals
         function updateRadioVisuals() {
@@ -627,6 +797,8 @@
 
             if (msg && msg.type === 'dimension-variables') {
                 console.log("UI Data:", msg.variables);
+                allDimensionVariables = msg.variables;
+                populateVariableDropdown();
             }
         };
 
@@ -640,7 +812,7 @@
             if (activeStrategy === 'STYLE') colorValue = selectedAssetId;
 
             const shouldResize = sizeCheckbox.checked;
-            const targetSize = parseInt(sizeInput.value, 10);
+            const targetSize = parseInt(sizeInput.value, 10) || 0; // Handle NaN if in text mode (though we pass variableId)
             const shouldOutline = outlineCheckbox.checked;
 
             parent.postMessage({
@@ -652,6 +824,7 @@
                     },
                     shouldResize: shouldResize,
                     targetSize: targetSize,
+                    targetSizeVariableId: selectedDimensionVariableId,
                     shouldOutline: shouldOutline
                 }
             }, '*');

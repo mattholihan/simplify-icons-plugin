@@ -289,12 +289,30 @@ figma.ui.onmessage = async msg => {
                 // Handle Resizing
                 const shouldResize = msg.shouldResize;
                 const targetSize = msg.targetSize;
+                const targetSizeVariableId = msg.targetSizeVariableId;
 
-                if (shouldResize && targetSize && targetSize > 0) {
-                    console.log(`Resizing node to ${targetSize}x${targetSize}`);
-                    // Resize the container frame
-                    // Constraints are already set to SCALE above, so the vector will adjust proportionally
-                    node.resize(targetSize, targetSize);
+                if (shouldResize) {
+                    if (targetSizeVariableId) {
+                        try {
+                            const variable = await figma.variables.getVariableByIdAsync(targetSizeVariableId);
+                            if (variable) {
+                                console.log(`Applying variable ${variable.name} to dimensions`);
+                                // Set bound variable for width and height
+                                node.setBoundVariable('width', variable.id);
+                                node.setBoundVariable('height', variable.id);
+                                // Note: We might also want to set the explicit size for the current mode if not automatically handled,
+                                // but binding usually handles it. If it doesn't update visual size immediately in some contexts, explicit resize matches resolves value.
+                                // However, setBoundVariable is primary.
+                            }
+                        } catch (e) {
+                            console.error("Failed to apply dimension variable", e);
+                        }
+                    } else if (targetSize && targetSize > 0) {
+                        console.log(`Resizing node to ${targetSize}x${targetSize}`);
+                        // Resize the container frame
+                        // Constraints are already set to SCALE above, so the vector will adjust proportionally
+                        node.resize(targetSize, targetSize);
+                    }
                 }
 
                 // Cleanup: Remove original group if it exists
