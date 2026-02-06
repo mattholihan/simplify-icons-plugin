@@ -445,6 +445,24 @@
                                 min="1">
                             <span id="px-suffix"
                                 style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-secondary); font-size: 14px; pointer-events: none;">px</span>
+
+                            <!-- Variable Chip -->
+                            <div id="variable-chip" class="variable-chip" style="display: none;">
+                                <svg width="16" height="16" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10 2.5L16.0622 6V13L10 16.5L3.93782 13V6L10 2.5Z" stroke="#1E1E1E"
+                                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <span id="variable-chip-text"
+                                    style="padding-left: 8px; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; font-weight: 500;">Variable</span>
+                                <div id="variable-chip-clear" class="chip-clear-btn" title="Clear variable">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         <button id="variable-toggle-btn" class="variable-btn" title="Select variable">
@@ -571,6 +589,9 @@
         const variableToggleBtn = document.getElementById('variable-toggle-btn');
         const variableDropdown = document.getElementById('variable-dropdown');
         const pxSuffix = document.getElementById('px-suffix');
+        const variableChip = document.getElementById('variable-chip');
+        const variableChipText = document.getElementById('variable-chip-text');
+        const variableChipClear = document.getElementById('variable-chip-clear');
 
         let allDimensionVariables = [];
         let selectedDimensionVariableId = null;
@@ -585,6 +606,13 @@
             e.stopPropagation(); // Prevent immediate close
             const isVisible = variableDropdown.style.display === 'block';
             variableDropdown.style.display = isVisible ? 'none' : 'block';
+            variableToggleBtn.classList.toggle('active', !isVisible);
+        };
+
+        // Clear Variable Logic
+        variableChipClear.onclick = (e) => {
+            e.stopPropagation();
+            selectDimensionVariable(null);
         };
 
         // Close dropdown when clicking outside
@@ -633,20 +661,21 @@
             if (variable) {
                 selectedDimensionVariableId = variable.id;
 
-                // Switch input to text mode (Chip)
-                sizeInput.type = 'text';
-                sizeInput.value = variable.name;
-                sizeInput.readOnly = true;
-                sizeInput.classList.add('chip-input');
+                // Show Chip
+                variableChip.style.display = 'flex';
+                variableChipText.textContent = variable.name;
+
+                // Hide Manual Input visual elements
                 pxSuffix.style.display = 'none';
 
             } else {
                 // Reset to Manual
                 selectedDimensionVariableId = null;
-                sizeInput.type = 'number';
-                sizeInput.value = '24'; // Default or keep previous manual value? Resetting is safer for now.
-                sizeInput.readOnly = false;
-                sizeInput.classList.remove('chip-input');
+
+                // Hide Chip
+                variableChip.style.display = 'none';
+
+                // Show Manual Input visual elements
                 pxSuffix.style.display = 'block';
             }
 
