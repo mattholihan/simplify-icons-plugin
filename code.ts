@@ -154,6 +154,8 @@ figma.ui.onmessage = async msg => {
         const colorOptions = msg.colorOptions;
         let count = 0;
 
+
+
         const itemsToProcess: { container: SceneNode; originalGroup?: GroupNode }[] = [];
 
         // Pre-process selection: Wrap Groups in Frames
@@ -254,38 +256,6 @@ figma.ui.onmessage = async msg => {
                 // Important: Set this AFTER centering so it scales from the center
                 flattened.constraints = { horizontal: "SCALE", vertical: "SCALE" };
 
-                // Apply Color Logic
-                if (colorOptions && colorOptions.mode !== 'ORIGINAL') {
-                    const val = colorOptions.value;
-
-                    if (colorOptions.mode === 'HEX' && val) {
-                        const rgb = hexToRgb(val);
-                        if (rgb) {
-                            flattened.fills = [{ type: 'SOLID', color: rgb }];
-                        }
-                    } else if (colorOptions.mode === 'STYLE' && val) {
-                        // Try Style first
-                        const style = await figma.getStyleByIdAsync(val);
-                        if (style) {
-                            flattened.fillStyleId = style.id;
-                        } else {
-                            // Try Variable
-                            try {
-                                const variable = await figma.variables.getVariableByIdAsync(val);
-                                if (variable) {
-                                    const currentFills = (flattened.fills as Paint[]).length > 0 ? [...(flattened.fills as Paint[])] : [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
-                                    if (currentFills[0].type === "SOLID") {
-                                        const newPaint = figma.variables.setBoundVariableForPaint(currentFills[0] as SolidPaint, 'color', variable);
-                                        flattened.fills = [newPaint];
-                                    }
-                                }
-                            } catch (e) {
-                                // console.error("Error applying variable", e);
-                            }
-                        }
-                    }
-                }
-
                 // Handle Resizing
                 const shouldResize = msg.shouldResize;
                 const targetSize = msg.targetSize;
@@ -319,20 +289,63 @@ figma.ui.onmessage = async msg => {
                     }
                 }
 
-                // Cleanup: Remove original group if it exists
-                if (item.originalGroup && !item.originalGroup.removed) {
-                    item.originalGroup.remove();
-                }
+                // Apply Color Logic
+                if (colorOptions && colorOptions.mode !== 'ORIGINAL') {
+                    const val = colorOptions.value;
 
-                // Fallback cleanup for any other empty groups
-                const emptyGroups = node.findAll(n => n.type === "GROUP" && n.children.length === 0);
-                for (const group of emptyGroups) {
-                    group.remove();
-                }
+                    if (colorOptions.mode === 'HEX' && val) {
+                        const rgb = hexToRgb(val);
+                        if (rgb) {
+                            flattened.fills = [{ type: 'SOLID', color: rgb }];
+                        }
+                    } else if (colorOptions.mode === 'STYLE' && val) {
+                        try {
+                            // Unified Logic: Try Style first, then Variable
+                            const style = await figma.getStyleByIdAsync(val);
+                            if (style) {
+                                flattened.fillStyleId = style.id;
+                            } else {
+                                const variable = await figma.variables.getVariableByIdAsync(val);
+                                if (variable) {
+                                    // Ensure we have a valid solid paint to bind to
+                                    // Safely handle fills which might be figma.mixed
+                                    let currentFills: Paint[] = [];
+                                    if (Array.isArray(flattened.fills)) {
+                                        currentFills = [...flattened.fills];
+                                    }
 
-                count++;
+                                    if (currentFills.length === 0 || currentFills[0].type !== 'SOLID') {
+                                        flattened.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+                                        currentFills = flattened.fills as Paint[];
+                                    }
+
+                                    const basePaint = currentFills[0] as SolidPaint;
+                                    const newPaint = figma.variables.setBoundVariableForPaint(basePaint, 'color', variable);
+                                    flattened.fills = [newPaint];
+                                }
+                            }
+                        } catch (e) {
+                            console.error("Error applying color style/variable:", e);
+                            // Do not throw, allowing cleanup to proceed
+                        }
+                    }
+                }
             }
+
+            // Cleanup: Remove original group if it exists
+            if (item.originalGroup && !item.originalGroup.removed) {
+                item.originalGroup.remove();
+            }
+
+            // Fallback cleanup for any other empty groups
+            const emptyGroups = node.findAll(n => n.type === "GROUP" && n.children.length === 0);
+            for (const group of emptyGroups) {
+                group.remove();
+            }
+
+            count++;
         }
+
         if (count > 0) {
             figma.notify(`Simplified ${count} ${count === 1 ? 'icon' : 'icons'} successfully!`, { timeout: 2000 });
         } else {
