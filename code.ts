@@ -294,23 +294,27 @@ figma.ui.onmessage = async msg => {
                 if (shouldResize) {
                     if (targetSizeVariableId) {
                         try {
+                            // 1. Get the actual Variable object, not just the ID
                             const variable = await figma.variables.getVariableByIdAsync(targetSizeVariableId);
+
                             if (variable) {
-                                console.log(`Applying variable ${variable.name} to dimensions`);
-                                // Set bound variable for width and height
-                                node.setBoundVariable('width', variable.id);
-                                node.setBoundVariable('height', variable.id);
-                                // Note: We might also want to set the explicit size for the current mode if not automatically handled,
-                                // but binding usually handles it. If it doesn't update visual size immediately in some contexts, explicit resize matches resolves value.
-                                // However, setBoundVariable is primary.
+                                console.log("Binding Variable:", variable.name, "to Node:", node.name);
+
+                                // 2. Use the modern syntax: pass the variable object instead of the ID string
+                                node.setBoundVariable('width', variable);
+                                node.setBoundVariable('height', variable);
+
+                                // 3. Resolve and force the physical resize
+                                const { value } = variable.resolveForConsumer(node);
+
+                                if (typeof value === 'number') {
+                                    node.resize(value, value);
+                                }
                             }
                         } catch (e) {
                             console.error("Failed to apply dimension variable", e);
                         }
                     } else if (targetSize && targetSize > 0) {
-                        console.log(`Resizing node to ${targetSize}x${targetSize}`);
-                        // Resize the container frame
-                        // Constraints are already set to SCALE above, so the vector will adjust proportionally
                         node.resize(targetSize, targetSize);
                     }
                 }
