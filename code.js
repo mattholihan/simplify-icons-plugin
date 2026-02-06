@@ -76,6 +76,47 @@ function getLocalColorAssets() {
         figma.ui.postMessage({ type: 'color-assets', assets });
     });
 }
+function getDimensionVariables() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // 1. Fetch all local number (FLOAT) variables
+            const variables = yield figma.variables.getLocalVariablesAsync('FLOAT');
+            // 2. Define the context for resolving values (uses the first selected item or current page)
+            const context = figma.currentPage.selection[0] || figma.currentPage;
+            const resolvedAssets = variables
+                .filter(v => {
+                // Broad Filter: Include if scoped to Width/Height, OR if it has 'All Scopes' (empty array)
+                return v.scopes.length === 0 ||
+                    v.scopes.includes('WIDTH_HEIGHT') ||
+                    v.scopes.includes('ALL_SCOPES');
+            })
+                .map(v => {
+                // 3. Resolve the value for the current mode
+                const { value } = v.resolveForConsumer(context);
+                // Handle naming groups (e.g., "Sizes/Icon/Small" -> Group: "Sizes", Name: "Icon/Small")
+                const parts = v.name.split('/');
+                const group = parts.length > 1 ? parts[0] : 'General';
+                const name = parts.length > 1 ? parts.slice(1).join('/') : v.name;
+                return {
+                    id: v.id,
+                    name: name,
+                    group: group,
+                    // If the value is an alias, we provide a placeholder or resolve it further if needed
+                    value: typeof value === 'number' ? value : 'Alias'
+                };
+            });
+            console.log(`Backend: Found ${resolvedAssets.length} dimension variables.`);
+            // 4. Send the cleaned data to the UI
+            figma.ui.postMessage({
+                type: 'dimension-variables',
+                variables: resolvedAssets
+            });
+        }
+        catch (err) {
+            console.error("Failed to fetch dimension variables:", err);
+        }
+    });
+}
 function sendSelectionCount() {
     const selection = figma.currentPage.selection;
     const count = selection.length;
@@ -86,6 +127,7 @@ function sendSelectionCount() {
 sendSelectionCount();
 (() => __awaiter(void 0, void 0, void 0, function* () {
     yield getLocalColorAssets();
+    yield getDimensionVariables();
 }))();
 // Listen for selection changes
 figma.on("selectionchange", sendSelectionCount);

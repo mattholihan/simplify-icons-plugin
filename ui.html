@@ -624,6 +624,10 @@
                 allAssets = msg.assets;
                 renderList();
             }
+
+            if (msg && msg.type === 'dimension-variables') {
+                console.log("UI Data:", msg.variables);
+            }
         };
 
         btn.onclick = () => {
