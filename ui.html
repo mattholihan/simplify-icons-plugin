@@ -617,6 +617,7 @@
 
         let allAssets = [];
         let selectedAssetId = null;
+        let selectedAssetType = null;
         let activeStrategy = 'ORIGINAL';
 
         const variableToggleBtn = document.getElementById('variable-toggle-btn');
@@ -840,6 +841,7 @@
 
         function selectAsset(asset) {
             selectedAssetId = asset.id;
+            selectedAssetType = asset.type; // 'STYLE' or 'VARIABLE'
             selectedAssetIdInput.value = asset.id;
             renderList(searchInput.value);
         }
@@ -882,7 +884,8 @@
                     type: 'standardize-selection',
                     colorOptions: {
                         mode: activeStrategy,
-                        value: colorValue
+                        value: colorValue,
+                        type: selectedAssetType // 'STYLE' or 'VARIABLE'
                     },
                     shouldResize: shouldResize,
                     targetSize: targetSize,
