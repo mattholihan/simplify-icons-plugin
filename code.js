@@ -223,15 +223,24 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
                         nodesToFlatten.push(vNode);
                     }
                 }
+                // Calculate original bounding box before flattening
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                for (const n of nodesToFlatten) {
+                    minX = Math.min(minX, n.x);
+                    minY = Math.min(minY, n.y);
+                    maxX = Math.max(maxX, n.x + n.width);
+                    maxY = Math.max(maxY, n.y + n.height);
+                }
+                const originalX = minX;
+                const originalY = minY;
                 // Flatten them
                 const flattened = figma.flatten(nodesToFlatten, node);
                 // Rename
                 flattened.name = "Vector";
-                // Center the vector within the frame
-                flattened.x = (node.width - flattened.width) / 2;
-                flattened.y = (node.height - flattened.height) / 2;
-                // Set constraints (SCALE preserves relative position/size)
-                // Important: Set this AFTER centering so it scales from the center
+                // Restore original position
+                flattened.x = originalX;
+                flattened.y = originalY;
+                // Set constraints AFTER position is restored (SCALE preserves relative position/size)
                 flattened.constraints = { horizontal: "SCALE", vertical: "SCALE" };
                 // Handle Resizing
                 const shouldResize = msg.shouldResize;
@@ -243,7 +252,6 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
                             // 1. Get the actual Variable object, not just the ID
                             const variable = yield figma.variables.getVariableByIdAsync(targetSizeVariableId);
                             if (variable) {
-                                console.log("Binding Variable:", variable.name, "to Node:", node.name);
                                 // 2. Use the modern syntax: pass the variable object instead of the ID string
                                 node.setBoundVariable('width', variable);
                                 node.setBoundVariable('height', variable);
@@ -252,6 +260,8 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
                                 if (typeof value === 'number') {
                                     node.resize(value, value);
                                 }
+                                // 4. Lock aspect ratio
+                                node.constrainProportions = true;
                             }
                         }
                         catch (e) {
@@ -260,6 +270,7 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
                     }
                     else if (targetSize && targetSize > 0) {
                         node.resize(targetSize, targetSize);
+                        node.constrainProportions = true;
                     }
                 }
                 // Apply Color Logic
