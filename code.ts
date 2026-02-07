@@ -292,7 +292,6 @@ figma.ui.onmessage = async msg => {
                 // Apply Color Logic
                 if (colorOptions && colorOptions.mode !== 'ORIGINAL') {
                     const val = colorOptions.value;
-                    const assetType = colorOptions.type; // 'STYLE' or 'VARIABLE'
 
                     if (colorOptions.mode === 'HEX' && val) {
                         const rgb = hexToRgb(val);
@@ -300,44 +299,53 @@ figma.ui.onmessage = async msg => {
                             flattened.fills = [{ type: 'SOLID', color: rgb }];
                         }
                     } else if (colorOptions.mode === 'STYLE' && val) {
-                        // Use the asset type to determine how to apply the color
-                        if (assetType === 'VARIABLE') {
-                            // Apply as a Variable
-                            try {
-                                const variable = await figma.variables.getVariableByIdAsync(val);
-                                if (variable) {
-                                    const currentFills = (flattened.fills as Paint[]).length > 0 ? [...(flattened.fills as Paint[])] : [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
-                                    if (currentFills[0].type === "SOLID") {
-                                        const newPaint = figma.variables.setBoundVariableForPaint(currentFills[0] as SolidPaint, 'color', variable);
-                                        flattened.fills = [newPaint];
-                                    }
-                                }
-                            } catch (e) {
-                                console.error("Error applying color variable", e);
-                            }
+                        // Unified approach: Try Style first, fallback to Variable
+                        const style = await figma.getStyleByIdAsync(val);
+
+                        if (style) {
+                            // It's a Style
+                            await flattened.setFillStyleIdAsync(style.id);
                         } else {
-                            // Apply as a Style (default)
-                            try {
-                                const style = await figma.getStyleByIdAsync(val);
-                                if (style) {
-                                    flattened.fillStyleId = style.id;
+                            // Fallback: Try it as a Variable
+                            const variable = await figma.variables.getVariableByIdAsync(val);
+                            if (variable) {
+                                const currentFills = (flattened.fills as Paint[]).length > 0
+                                    ? [...(flattened.fills as Paint[])]
+                                    : [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+
+                                if (currentFills[0].type === "SOLID") {
+                                    const newPaint = figma.variables.setBoundVariableForPaint(
+                                        currentFills[0] as SolidPaint,
+                                        'color',
+                                        variable
+                                    );
+                                    flattened.fills = [newPaint];
                                 }
-                            } catch (e) {
-                                console.error("Error applying color style", e);
                             }
                         }
                     }
                 }
 
                 // Cleanup: Remove original group if it exists
-                if (item.originalGroup && !item.originalGroup.removed) {
-                    item.originalGroup.remove();
+                // This must happen AFTER all async operations are complete
+                if (item.originalGroup) {
+                    try {
+                        if (!item.originalGroup.removed) {
+                            item.originalGroup.remove();
+                        }
+                    } catch (e) {
+                        // Ignore cleanup errors
+                    }
                 }
 
-                // Fallback cleanup for any other empty groups
-                const emptyGroups = node.findAll(n => n.type === "GROUP" && n.children.length === 0);
-                for (const group of emptyGroups) {
-                    group.remove();
+                // Fallback cleanup for any other empty groups within the frame
+                try {
+                    const emptyGroups = node.findAll(n => n.type === "GROUP" && n.children.length === 0);
+                    for (const group of emptyGroups) {
+                        group.remove();
+                    }
+                } catch (e) {
+                    // Ignore cleanup errors
                 }
 
                 count++;
