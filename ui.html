@@ -836,8 +836,13 @@
             const msg = event.data.pluginMessage;
 
             if (msg && msg.type === 'selection-updated') {
-                btn.textContent = `Simplify selection (${msg.count})`;
-                btn.disabled = msg.count === 0;
+                if (msg.count > 0) {
+                    btn.textContent = `Simplify selection (${msg.count})`;
+                    btn.disabled = false;
+                } else {
+                    btn.textContent = `Nothing selected`;
+                    btn.disabled = true;
+                }
             }
 
             if (msg && msg.type === 'color-assets') {
