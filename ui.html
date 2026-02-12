@@ -10,10 +10,10 @@
             --color-bg: #FFFFFF;
             --color-text: #1E1E1E;
             /* Dark Grey */
-            --color-text-secondary: #757575;
+            --color-text-secondary: #707070;
             --color-text-inverse: #F5F5F5;
             --color-border-active: #2C2C2C;
-            --color-border-inactive: #B2B2B2;
+            --color-border-inactive: #d2d2d2;
             --color-brand: #1E1E1E;
             --color-bg-secondary: #F5F5F5;
             --color-danger: #F24822;
@@ -21,8 +21,6 @@
             --radius-m: 8px;
             --spacing-s: 8px;
             --spacing-m: 16px;
-
-            --shadow-button: 0px 4px 8px rgba(0, 0, 0, 0.5);
         }
 
         body {
@@ -43,7 +41,7 @@
             flex-grow: 1;
             overflow-y: auto;
             padding: 24px;
-            padding-bottom: 120px;
+            padding-bottom: 100px;
             /* Increased to ensure list visibility above fixed button */
             /* Space for floating button */
             display: flex;
@@ -232,12 +230,16 @@
 
         /* Floating Button Container */
         .floating-action {
-            position: absolute;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 229px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
             z-index: 10;
+            background-color: var(--color-bg);
+            padding: 16px 24px 24px 24px;
+            border-top: 1px solid var(--color-border-inactive);
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
         }
 
         #standardizeBtn {
@@ -251,8 +253,6 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: var(--shadow-button);
-            transition: transform 0.1s ease, box-shadow 0.1s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -260,19 +260,19 @@
 
         #standardizeBtn:hover:not(:disabled) {
             transform: translateY(-2px);
+            transition: transform 0.1s ease;
         }
 
         #standardizeBtn:active:not(:disabled) {
             transform: translateY(1px);
+            transition: transform 0.1s ease;
         }
 
         #standardizeBtn:disabled {
-            background-color: var(--figma-color-bg-disabled);
-            color: var(--color-text-inverse);
-            opacity: 1;
-            /* Opaque as requested */
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border-inactive);
+            color: var(--color-text-secondary);
             cursor: not-allowed;
-            box-shadow: none;
         }
 
         /* Custom Checkbox */
