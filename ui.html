@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -10,13 +11,14 @@
             --color-bg: #FFFFFF;
             --color-text: #1E1E1E;
             /* Dark Grey */
-            --color-text-secondary: #707070;
+            --color-text-secondary: #666666;
             --color-text-inverse: #F5F5F5;
             --color-border-active: #2C2C2C;
             --color-border-inactive: #d2d2d2;
             --color-brand: #1E1E1E;
             --color-bg-secondary: #F5F5F5;
             --color-danger: #F24822;
+            --color-focus: #1E1E1E;
 
             --radius-m: 8px;
             --spacing-s: 8px;
@@ -73,19 +75,51 @@
             display: block;
         }
 
+        /* Fieldset reset */
+        fieldset {
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        legend {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: block;
+            padding: 0;
+        }
+
+        /* Visually-hidden utility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
         /* Radio Cards */
         .radio-group {
             display: flex;
             gap: 8px;
         }
 
-        /* Hide actual radio inputs */
+        /* Visually hide radio inputs while keeping them keyboard-accessible */
         .radio-group input[type="radio"] {
             position: absolute;
-            opacity: 0;
-            cursor: pointer;
-            height: 0;
-            width: 0;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
         .radio-card {
@@ -114,6 +148,13 @@
             /* Keep 1px border but colored */
             box-shadow: inset 0 0 0 1px var(--color-brand);
             /* Inner thickening */
+        }
+
+        /* Focus indicator for radio cards — applied via JS since
+           :has() may not be supported in Figma's webview */
+        .radio-card.focused {
+            outline: 2px solid var(--color-focus);
+            outline-offset: 2px;
         }
 
         .radio-icon {
@@ -154,6 +195,12 @@
             /* Keep 1px border but colored */
             box-shadow: inset 0 0 0 1px var(--color-brand);
             /* Inner thickening */
+        }
+
+        input[type="text"]:focus-visible,
+        input[type="number"]:focus-visible {
+            outline: 2px solid var(--color-focus);
+            outline-offset: 2px;
         }
 
         /* Color List */
@@ -204,6 +251,11 @@
             background-color: #E8E8E8;
             /* Slightly darker than hover */
             font-weight: 600;
+        }
+
+        .color-item:focus-visible {
+            outline: 2px solid var(--color-focus);
+            outline-offset: -2px;
         }
 
         .swatch {
@@ -275,6 +327,11 @@
             cursor: not-allowed;
         }
 
+        #standardizeBtn:focus-visible {
+            outline: 2px solid var(--color-focus);
+            outline-offset: 2px;
+        }
+
         /* Custom Checkbox */
         input[type="checkbox"] {
             appearance: none;
@@ -297,6 +354,11 @@
             background-repeat: no-repeat;
             background-position: center;
             box-shadow: inset 0 0 0 1px var(--color-brand);
+        }
+
+        input[type="checkbox"]:focus-visible {
+            outline: 2px solid var(--color-focus);
+            outline-offset: 2px;
         }
 
         /* Toggle Tile */
@@ -325,6 +387,12 @@
         .toggle-tile:has(input:checked) {
             border: 1px solid var(--color-brand);
             box-shadow: inset 0 0 0 1px var(--color-brand);
+        }
+
+        /* Focus indicator for Toggle Tile — applied via JS */
+        .toggle-tile.focused {
+            outline: 2px solid var(--color-focus);
+            outline-offset: 2px;
         }
 
         /* Variable Dropdown UI */
@@ -356,6 +424,11 @@
             border-color: var(--color-brand);
             cursor: pointer;
             box-shadow: none;
+        }
+
+        .variable-button:focus-visible {
+            outline: 2px solid var(--color-focus);
+            outline-offset: 2px;
         }
 
         .variable-button svg path {
@@ -391,6 +464,12 @@
             background-color: var(--color-bg-secondary);
         }
 
+        .variable-item:focus-visible {
+            outline: 2px solid var(--color-focus);
+            outline-offset: -2px;
+            background-color: var(--color-bg-secondary);
+        }
+
         /* New Variable Chip Container */
         .variable-chip-container {
             width: 100%;
@@ -417,30 +496,36 @@
             color: var(--color-text-secondary);
             border-radius: 4px;
             transition: all 0.1s ease;
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: inherit;
         }
 
         .chip-clear-btn:hover {
             background-color: rgba(0, 0, 0, 0.05);
             color: var(--color-text);
         }
+
+        .chip-clear-btn:focus-visible {
+            outline: 2px solid var(--color-focus);
+            outline-offset: 2px;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Header -->
-    <!-- Header Removed -->
-
     <!-- Main Content -->
-    <div class="content-scroll">
+    <main class="content-scroll">
 
         <div style="margin-top: 0;">
             <h1>Simplify Icons</h1>
             <p>Declutter icon layers and normalise geometry in a single click.</p>
         </div>
 
-        <!-- Dimensions Section -->
-        <div>
-            <span class="label">Transform & scale</span>
+        <!-- Transform & Scale Section -->
+        <fieldset>
+            <legend>Transform &amp; scale</legend>
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <div style="display: flex; flex-direction: row; gap: 8px;">
 
@@ -460,61 +545,67 @@
                         <div style="position: relative; width: 100%;">
                             <!-- Manual Mode -->
                             <div id="manual-size-container" style="position: relative; width: 100%;">
-                                <input type="number" id="size-input" value="24"
+                                <label for="size-input" class="sr-only">Icon size in pixels</label>
+                                <input type="number" id="size-input" value="24" aria-label="Icon size in pixels"
                                     style="width: 100%; padding-right: 32px;" min="1">
-                                <span id="px-suffix"
+                                <span id="px-suffix" aria-hidden="true"
                                     style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-secondary); font-size: 14px; pointer-events: none;">px</span>
                             </div>
 
                             <!-- Variable Mode -->
-                            <div id="variable-chip-container" class="variable-chip-container" style="display: none;">
+                            <div id="variable-chip-container" class="variable-chip-container" style="display: none;"
+                                role="status" aria-label="Selected size variable">
                                 <div
                                     style="display: flex; align-items: center; gap: 8px; flex-grow: 1; overflow: hidden;">
                                     <span id="variable-chip-text"
                                         style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 16px; font-weight: 400;">Variable</span>
                                 </div>
-                                <div id="variable-chip-clear" class="chip-clear-btn" title="Clear variable">
+                                <button id="variable-chip-clear" class="chip-clear-btn" type="button"
+                                    aria-label="Clear selected variable">
                                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
+                                        xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                         <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" stroke-width="1.5"
                                             stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
-                                </div>
+                                </button>
                             </div>
                         </div>
 
-                        <button id="variable-toggle-btn" class="variable-button" title="Select variable">
+                        <button id="variable-toggle-btn" class="variable-button" type="button"
+                            aria-label="Select size variable" aria-haspopup="listbox" aria-expanded="false"
+                            aria-controls="variable-dropdown">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
+                                xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                 <polygon points="10,2 16.93,5.5 16.93,14.5 10,18 3.07,14.5 3.07,5.5" fill="none"
                                     stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
                                 <circle cx="10" cy="10" r="2" fill="currentColor" />
                             </svg>
                         </button>
 
-                        <div id="variable-dropdown">
+                        <div id="variable-dropdown" role="listbox" aria-label="Size variables">
                             <!-- Populated by JS -->
                         </div>
                     </div>
                 </div>
 
             </div>
-        </div>
+        </fieldset>
 
-        <div>
-            <span class="label">Colour mode</span>
-            <div class="radio-group">
+        <!-- Colour Mode Section -->
+        <fieldset>
+            <legend>Colour mode</legend>
+            <div class="radio-group" role="radiogroup" aria-label="Colour mode">
                 <!-- Original -->
                 <label class="radio-card active" id="card-original">
                     <input type="radio" name="colorMode" value="ORIGINAL" checked>
                     <!-- Unchecked SVG -->
                     <svg class="radio-icon unchecked" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        xmlns="http://www.w3.org/2000/svg" style="display:none">
+                        xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
                         <circle cx="12" cy="12" r="11.5" stroke="#B2B2B2" />
                     </svg>
                     <!-- Checked SVG -->
                     <svg class="radio-icon checked" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
+                        xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <circle cx="12" cy="12" r="11.5" stroke="#2C2C2C" />
                         <circle cx="12" cy="12" r="6" fill="#2C2C2C" />
                     </svg>
@@ -525,11 +616,11 @@
                 <label class="radio-card" id="card-hex">
                     <input type="radio" name="colorMode" value="HEX">
                     <svg class="radio-icon unchecked" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
+                        xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <circle cx="12" cy="12" r="11.5" stroke="#B2B2B2" />
                     </svg>
                     <svg class="radio-icon checked" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        xmlns="http://www.w3.org/2000/svg" style="display:none">
+                        xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
                         <circle cx="12" cy="12" r="11.5" stroke="#2C2C2C" />
                         <circle cx="12" cy="12" r="6" fill="#2C2C2C" />
                     </svg>
@@ -540,30 +631,30 @@
                 <label class="radio-card" id="card-style">
                     <input type="radio" name="colorMode" value="STYLE">
                     <svg class="radio-icon unchecked" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
+                        xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <circle cx="12" cy="12" r="11.5" stroke="#B2B2B2" />
                     </svg>
                     <svg class="radio-icon checked" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        xmlns="http://www.w3.org/2000/svg" style="display:none">
+                        xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
                         <circle cx="12" cy="12" r="11.5" stroke="#2C2C2C" />
                         <circle cx="12" cy="12" r="6" fill="#2C2C2C" />
                     </svg>
                     <span class="radio-text">Styles</span>
                 </label>
             </div>
-        </div>
+        </fieldset>
 
         <!-- Section: Hex -->
         <div id="section-hex" class="content-section">
-            <span class="label">Custom HEX colour</span>
+            <label for="hexInput" class="label">Custom HEX colour</label>
             <div style="display:flex; gap:8px; align-items:center;">
-                <div id="hexPreview"
+                <div id="hexPreview" role="img" aria-label="Colour preview: #000000"
                     style="width:40px; height:40px; border-radius:100%; border:1px solid var(--color-border-inactive); background:#000000; flex-shrink:0;">
                 </div>
                 <div style="position: relative; width: 100%;">
-                    <span
+                    <span aria-hidden="true"
                         style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-secondary); font-size: 16px; pointer-events: none;">#</span>
-                    <input type="text" id="hexInput" placeholder="000000" value="000000"
+                    <input type="text" id="hexInput" placeholder="000000" value="000000" aria-label="HEX colour value"
                         style="padding-left: 24px; font-family: 'Inter', monospace;">
                 </div>
             </div>
@@ -571,20 +662,24 @@
 
         <!-- Section: Style -->
         <div id="section-style" class="content-section">
-            <span class="label">Select style or variable</span>
-            <input type="text" id="searchInput" placeholder="Search colours...">
-            <div id="colorList" class="color-list">
+            <label for="searchInput" class="label">Select style or variable</label>
+            <input type="text" id="searchInput" placeholder="Search colours..."
+                aria-label="Search colour styles and variables">
+            <div id="colorList" class="color-list" role="listbox" aria-label="Available colour styles and variables">
                 <!-- Populated by JS -->
-                <div style="padding:16px; color: var(--color-text-secondary); text-align:center;">Loading...</div>
+                <div style="padding:16px; color: var(--color-text-secondary); text-align:center;" role="status">
+                    Loading...</div>
             </div>
             <input type="hidden" id="selectedAssetId">
         </div>
 
-    </div>
+    </main>
 
     <!-- Fixed Footer -->
     <div class="floating-action">
-        <button id="standardizeBtn" disabled>Simplify selection (0)</button>
+        <div aria-live="polite" aria-atomic="true">
+            <button id="standardizeBtn" disabled>Simplify selection (0)</button>
+        </div>
     </div>
 
     <script>
@@ -616,6 +711,13 @@
         let allDimensionVariables = [];
         let selectedDimensionVariableId = null;
 
+        // Helper: update aria-expanded on variable toggle
+        function setVariableDropdownOpen(open) {
+            variableDropdown.style.display = open ? 'block' : 'none';
+            variableToggleBtn.setAttribute('aria-expanded', String(open));
+            variableToggleBtn.classList.toggle('active', open);
+        }
+
         // Dimensions Logic
         sizeCheckbox.onchange = () => {
             dimensionsContainer.style.display = sizeCheckbox.checked ? 'block' : 'none';
@@ -625,8 +727,7 @@
         variableToggleBtn.onclick = (e) => {
             e.stopPropagation(); // Prevent immediate close
             const isVisible = variableDropdown.style.display === 'block';
-            variableDropdown.style.display = isVisible ? 'none' : 'block';
-            variableToggleBtn.classList.toggle('active', !isVisible);
+            setVariableDropdownOpen(!isVisible);
         };
 
         // Clear Variable Logic
@@ -638,7 +739,7 @@
         // Close dropdown when clicking outside
         window.addEventListener('click', (e) => {
             if (!variableDropdown.contains(e.target) && e.target !== variableToggleBtn && !variableToggleBtn.contains(e.target)) {
-                variableDropdown.style.display = 'none';
+                setVariableDropdownOpen(false);
             }
         });
 
@@ -651,6 +752,8 @@
                 div.style.color = "var(--color-text-secondary)";
                 div.style.fontSize = "14px";
                 div.textContent = "No number variables found";
+                div.setAttribute('role', 'option');
+                div.setAttribute('aria-disabled', 'true');
                 variableDropdown.appendChild(div);
                 return;
             }
@@ -659,9 +762,17 @@
             if (selectedDimensionVariableId) {
                 const manualItem = document.createElement('div');
                 manualItem.className = 'variable-item';
+                manualItem.setAttribute('role', 'option');
+                manualItem.setAttribute('tabindex', '0');
                 manualItem.innerHTML = '<span>Manual Value</span><span>—</span>';
                 manualItem.onclick = () => {
                     selectDimensionVariable(null);
+                };
+                manualItem.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        selectDimensionVariable(null);
+                    }
                 };
                 variableDropdown.appendChild(manualItem);
             }
@@ -669,9 +780,17 @@
             allDimensionVariables.forEach(v => {
                 const item = document.createElement('div');
                 item.className = 'variable-item';
+                item.setAttribute('role', 'option');
+                item.setAttribute('tabindex', '0');
                 item.innerHTML = `<span>${v.name}</span><span style="color: var(--color-text-secondary);">${v.value}</span>`;
                 item.onclick = () => {
                     selectDimensionVariable(v);
+                };
+                item.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        selectDimensionVariable(v);
+                    }
                 };
                 variableDropdown.appendChild(item);
             });
@@ -699,7 +818,7 @@
                 manualSizeContainer.style.display = 'block';
             }
 
-            variableDropdown.style.display = 'none';
+            setVariableDropdownOpen(false);
         }
 
 
@@ -757,6 +876,7 @@
             // Preview
             if (val.length === 3 || val.length === 6) {
                 hexPreview.style.background = '#' + val;
+                hexPreview.setAttribute('aria-label', 'Colour preview: #' + val);
             }
         };
 
@@ -785,6 +905,7 @@
                 div.style.padding = "16px";
                 div.style.color = "var(--color-text-secondary)";
                 div.textContent = "No colors found.";
+                div.setAttribute('role', 'status');
                 colorList.appendChild(div);
                 return;
             }
@@ -793,15 +914,20 @@
                 const header = document.createElement('div');
                 header.className = 'color-group';
                 header.textContent = groupName;
+                header.setAttribute('role', 'presentation');
                 colorList.appendChild(header);
 
                 groups[groupName].forEach(asset => {
                     const item = document.createElement('div');
                     item.className = 'color-item';
+                    item.setAttribute('role', 'option');
+                    item.setAttribute('tabindex', '0');
+                    item.setAttribute('aria-selected', asset.id === selectedAssetId ? 'true' : 'false');
                     if (asset.id === selectedAssetId) item.classList.add('selected');
 
                     const swatch = document.createElement('div');
                     swatch.className = 'swatch';
+                    swatch.setAttribute('aria-hidden', 'true');
 
                     if (asset.hex) {
                         swatch.style.backgroundColor = asset.hex;
@@ -818,6 +944,13 @@
 
                     item.onclick = () => {
                         selectAsset(asset);
+                    };
+
+                    item.onkeydown = (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            selectAsset(asset);
+                        }
                     };
 
                     colorList.appendChild(item);
@@ -885,6 +1018,17 @@
                 }
             }, '*');
         }
+
+        // Focus management for radio cards and toggle tiles
+        // (JS-based because :has() may not work in Figma's webview)
+        document.querySelectorAll('.radio-card input[type="radio"], .toggle-tile input[type="checkbox"]').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.closest('.radio-card, .toggle-tile').classList.add('focused');
+            });
+            input.addEventListener('blur', () => {
+                input.closest('.radio-card, .toggle-tile').classList.remove('focused');
+            });
+        });
 
         // Initial visual state
         updateRadioVisuals();
