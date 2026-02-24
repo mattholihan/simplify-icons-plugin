@@ -276,29 +276,54 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
                 // Apply Color Logic
                 if (colorOptions && colorOptions.mode !== 'ORIGINAL') {
                     const val = colorOptions.value;
+                    // Determine which paint targets exist on the flattened node
+                    const hasFills = Array.isArray(flattened.fills) && flattened.fills.length > 0;
+                    const hasStrokes = 'strokes' in flattened
+                        && Array.isArray(flattened.strokes)
+                        && flattened.strokes.length > 0;
                     if (colorOptions.mode === 'HEX' && val) {
                         const rgb = hexToRgb(val);
                         if (rgb) {
-                            flattened.fills = [{ type: 'SOLID', color: rgb }];
+                            const solidPaint = { type: 'SOLID', color: rgb };
+                            if (hasFills) {
+                                flattened.fills = [solidPaint];
+                            }
+                            if (hasStrokes) {
+                                flattened.strokes = [solidPaint];
+                            }
                         }
                     }
                     else if (colorOptions.mode === 'STYLE' && val) {
                         // Unified approach: Try Style first, fallback to Variable
                         const style = yield figma.getStyleByIdAsync(val);
                         if (style) {
-                            // It's a Style
-                            yield flattened.setFillStyleIdAsync(style.id);
+                            // It's a Style — apply to fills and/or strokes
+                            if (hasFills) {
+                                yield flattened.setFillStyleIdAsync(style.id);
+                            }
+                            if (hasStrokes) {
+                                yield flattened.setStrokeStyleIdAsync(style.id);
+                            }
                         }
                         else {
                             // Fallback: Try it as a Variable
                             const variable = yield figma.variables.getVariableByIdAsync(val);
                             if (variable) {
-                                const currentFills = flattened.fills.length > 0
-                                    ? [...flattened.fills]
-                                    : [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
-                                if (currentFills[0].type === "SOLID") {
-                                    const newPaint = figma.variables.setBoundVariableForPaint(currentFills[0], 'color', variable);
-                                    flattened.fills = [newPaint];
+                                // Apply to fills (only if fills exist)
+                                if (hasFills) {
+                                    const currentFills = [...flattened.fills];
+                                    if (currentFills[0].type === "SOLID") {
+                                        const newPaint = figma.variables.setBoundVariableForPaint(currentFills[0], 'color', variable);
+                                        flattened.fills = [newPaint];
+                                    }
+                                }
+                                // Apply to strokes
+                                if (hasStrokes) {
+                                    const currentStrokes = [...flattened.strokes];
+                                    if (currentStrokes[0].type === "SOLID") {
+                                        const newStrokePaint = figma.variables.setBoundVariableForPaint(currentStrokes[0], 'color', variable);
+                                        flattened.strokes = [newStrokePaint];
+                                    }
                                 }
                             }
                         }

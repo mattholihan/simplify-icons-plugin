@@ -305,33 +305,63 @@ figma.ui.onmessage = async msg => {
                 if (colorOptions && colorOptions.mode !== 'ORIGINAL') {
                     const val = colorOptions.value;
 
+                    // Determine which paint targets exist on the flattened node
+                    const hasFills = Array.isArray(flattened.fills) && (flattened.fills as Paint[]).length > 0;
+                    const hasStrokes = 'strokes' in flattened
+                        && Array.isArray(flattened.strokes)
+                        && (flattened.strokes as Paint[]).length > 0;
+
                     if (colorOptions.mode === 'HEX' && val) {
                         const rgb = hexToRgb(val);
                         if (rgb) {
-                            flattened.fills = [{ type: 'SOLID', color: rgb }];
+                            const solidPaint: SolidPaint = { type: 'SOLID', color: rgb };
+                            if (hasFills) {
+                                flattened.fills = [solidPaint];
+                            }
+                            if (hasStrokes) {
+                                flattened.strokes = [solidPaint];
+                            }
                         }
                     } else if (colorOptions.mode === 'STYLE' && val) {
                         // Unified approach: Try Style first, fallback to Variable
                         const style = await figma.getStyleByIdAsync(val);
 
                         if (style) {
-                            // It's a Style
-                            await flattened.setFillStyleIdAsync(style.id);
+                            // It's a Style — apply to fills and/or strokes
+                            if (hasFills) {
+                                await flattened.setFillStyleIdAsync(style.id);
+                            }
+                            if (hasStrokes) {
+                                await (flattened as any).setStrokeStyleIdAsync(style.id);
+                            }
                         } else {
                             // Fallback: Try it as a Variable
                             const variable = await figma.variables.getVariableByIdAsync(val);
                             if (variable) {
-                                const currentFills = (flattened.fills as Paint[]).length > 0
-                                    ? [...(flattened.fills as Paint[])]
-                                    : [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
+                                // Apply to fills (only if fills exist)
+                                if (hasFills) {
+                                    const currentFills = [...(flattened.fills as Paint[])];
+                                    if (currentFills[0].type === "SOLID") {
+                                        const newPaint = figma.variables.setBoundVariableForPaint(
+                                            currentFills[0] as SolidPaint,
+                                            'color',
+                                            variable
+                                        );
+                                        flattened.fills = [newPaint];
+                                    }
+                                }
 
-                                if (currentFills[0].type === "SOLID") {
-                                    const newPaint = figma.variables.setBoundVariableForPaint(
-                                        currentFills[0] as SolidPaint,
-                                        'color',
-                                        variable
-                                    );
-                                    flattened.fills = [newPaint];
+                                // Apply to strokes
+                                if (hasStrokes) {
+                                    const currentStrokes = [...(flattened.strokes as Paint[])];
+                                    if (currentStrokes[0].type === "SOLID") {
+                                        const newStrokePaint = figma.variables.setBoundVariableForPaint(
+                                            currentStrokes[0] as SolidPaint,
+                                            'color',
+                                            variable
+                                        );
+                                        flattened.strokes = [newStrokePaint];
+                                    }
                                 }
                             }
                         }
