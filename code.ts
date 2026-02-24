@@ -21,7 +21,7 @@ async function resolveColorFromVariable(variable: Variable): Promise<string | nu
             return rgbToHex(r, g, b);
         }
     } catch (e) {
-        // console.error("Failed to resolve variable", variable.name, e);
+        // Silently continue — variable resolution may fail for aliases or missing modes
     }
     return null;
 }
@@ -80,8 +80,6 @@ async function getDimensionVariables() {
 
         const resolvedAssets = variables
             .filter(v => {
-                console.log(`Variable: ${v.name} | Scopes: ${v.scopes.join(', ') || 'All Scopes'}`);
-                // Strict Filter: Only include if explicitly scoped to Width/Height or ALL_SCOPES
                 return v.scopes.includes('WIDTH_HEIGHT') ||
                     v.scopes.includes('ALL_SCOPES');
             })
@@ -103,7 +101,7 @@ async function getDimensionVariables() {
                 };
             });
 
-        console.log(`Backend: Found ${resolvedAssets.length} dimension variables.`);
+
 
         // 4. Send the cleaned data to the UI
         figma.ui.postMessage({
@@ -122,7 +120,6 @@ function sendSelectionCount() {
     figma.ui.postMessage({ type: 'selection-updated', count: count });
 }
 
-// Initial count and assets
 // Initial count and assets
 sendSelectionCount();
 (async () => {
@@ -154,9 +151,7 @@ figma.ui.onmessage = async msg => {
         const colorOptions = msg.colorOptions;
         let count = 0;
 
-
-
-        const itemsToProcess: { container: SceneNode; originalGroup?: GroupNode }[] = [];
+        const itemsToProcess: { container: SceneNode }[] = [];
 
         // Pre-process selection: Wrap Groups in Frames
         for (const node of selection) {
@@ -180,7 +175,7 @@ figma.ui.onmessage = async msg => {
                 node.x = 0;
                 node.y = 0;
 
-                itemsToProcess.push({ container: frame, originalGroup: node });
+                itemsToProcess.push({ container: frame });
             } else if (node.type === "FRAME" || node.type === "COMPONENT") {
                 itemsToProcess.push({ container: node });
             } else if (node.type === "COMPONENT_SET") {
@@ -300,7 +295,7 @@ figma.ui.onmessage = async msg => {
                                 node.constrainProportions = true;
                             }
                         } catch (e) {
-                            console.error("Failed to apply dimension variable", e);
+                            console.error("Failed to apply dimension variable:", e);
                         }
                     } else if (targetSize && targetSize > 0) {
                         node.resize(targetSize, targetSize);

@@ -31,7 +31,7 @@ function resolveColorFromVariable(variable) {
             }
         }
         catch (e) {
-            // console.error("Failed to resolve variable", variable.name, e);
+            // Silently continue — variable resolution may fail for aliases or missing modes
         }
         return null;
     });
@@ -85,8 +85,6 @@ function getDimensionVariables() {
             const context = figma.currentPage.selection[0] || figma.currentPage;
             const resolvedAssets = variables
                 .filter(v => {
-                console.log(`Variable: ${v.name} | Scopes: ${v.scopes.join(', ') || 'All Scopes'}`);
-                // Strict Filter: Only include if explicitly scoped to Width/Height or ALL_SCOPES
                 return v.scopes.includes('WIDTH_HEIGHT') ||
                     v.scopes.includes('ALL_SCOPES');
             })
@@ -105,7 +103,6 @@ function getDimensionVariables() {
                     value: typeof value === 'number' ? value : 'Alias'
                 };
             });
-            console.log(`Backend: Found ${resolvedAssets.length} dimension variables.`);
             // 4. Send the cleaned data to the UI
             figma.ui.postMessage({
                 type: 'dimension-variables',
@@ -122,7 +119,6 @@ function sendSelectionCount() {
     const count = selection.length;
     figma.ui.postMessage({ type: 'selection-updated', count: count });
 }
-// Initial count and assets
 // Initial count and assets
 sendSelectionCount();
 (() => __awaiter(void 0, void 0, void 0, function* () {
@@ -168,7 +164,7 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
                 frame.appendChild(node);
                 node.x = 0;
                 node.y = 0;
-                itemsToProcess.push({ container: frame, originalGroup: node });
+                itemsToProcess.push({ container: frame });
             }
             else if (node.type === "FRAME" || node.type === "COMPONENT") {
                 itemsToProcess.push({ container: node });
@@ -273,7 +269,7 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
                             }
                         }
                         catch (e) {
-                            console.error("Failed to apply dimension variable", e);
+                            console.error("Failed to apply dimension variable:", e);
                         }
                     }
                     else if (targetSize && targetSize > 0) {

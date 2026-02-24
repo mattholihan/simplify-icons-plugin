@@ -10,10 +10,8 @@
         :root {
             --color-bg: #FFFFFF;
             --color-text: #1E1E1E;
-            /* Dark Grey */
             --color-text-secondary: #666666;
             --color-text-inverse: #F5F5F5;
-            --color-border-active: #2C2C2C;
             --color-border-inactive: #d2d2d2;
             --color-brand: #1E1E1E;
             --color-bg-secondary: #F5F5F5;
@@ -21,8 +19,6 @@
             --color-focus: #725ef6;
 
             --radius-m: 8px;
-            --spacing-s: 8px;
-            --spacing-m: 16px;
         }
 
         body {
@@ -53,7 +49,6 @@
 
         h1 {
             font-size: 24px;
-            /* Assuming roughly Heading Base */
             font-weight: 600;
             margin: 0 0 8px 0;
             letter-spacing: -0.5px;
@@ -61,7 +56,6 @@
 
         p {
             font-size: 16px;
-            /* Body Base */
             line-height: 1.5;
             color: var(--color-text);
             margin: 0;
@@ -70,7 +64,6 @@
         .label {
             font-size: 16px;
             font-weight: 600;
-            /* Body Strong */
             margin-bottom: 12px;
             display: block;
         }
@@ -134,7 +127,6 @@
             transition: all 0.1s ease;
             position: relative;
             flex: 1;
-            /* Distribute space */
             background-color: var(--color-bg);
             color: var(--color-text);
         }
@@ -145,9 +137,7 @@
 
         .radio-card.active {
             border: 1px solid var(--color-brand);
-            /* Keep 1px border but colored */
             box-shadow: inset 0 0 0 1px var(--color-brand);
-            /* Inner thickening */
         }
 
         /* Focus indicator for radio cards — applied via JS since
@@ -192,9 +182,7 @@
         input[type="text"]:focus,
         input[type="number"]:focus {
             border: 1px solid var(--color-brand);
-            /* Keep 1px border but colored */
             box-shadow: inset 0 0 0 1px var(--color-brand);
-            /* Inner thickening */
         }
 
         input[type="text"]:focus-visible,
@@ -207,8 +195,6 @@
         .color-list {
             border: 1px solid var(--color-border-inactive);
             border-radius: var(--radius-m);
-            /* max-height: 200px;  Removed for full expansion */
-            /* overflow-y: auto; Removed for natural flow */
             background: white;
             margin-top: 12px;
             overflow: hidden;
@@ -249,7 +235,6 @@
 
         .color-item.selected {
             background-color: #E8E8E8;
-            /* Slightly darker than hover */
             font-weight: 600;
         }
 
@@ -422,8 +407,6 @@
 
         .variable-button:hover {
             border-color: var(--color-brand);
-            cursor: pointer;
-            box-shadow: none;
         }
 
         .variable-button:focus-visible {
@@ -470,15 +453,12 @@
             background-color: var(--color-bg-secondary);
         }
 
-        /* New Variable Chip Container */
         .variable-chip-container {
             width: 100%;
             height: 40px;
-            /* Match input height */
             border: 1px solid var(--color-border-inactive);
             border-radius: var(--radius-m);
             display: flex;
-            /* overridden by inline style when toggled, but good default */
             align-items: center;
             padding: 0 12px;
             box-sizing: border-box;
@@ -984,7 +964,6 @@
             }
 
             if (msg && msg.type === 'dimension-variables') {
-                console.log("UI Data:", msg.variables);
                 allDimensionVariables = msg.variables;
                 populateVariableDropdown();
             }
