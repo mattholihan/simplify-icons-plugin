@@ -181,17 +181,24 @@ figma.ui.onmessage = async msg => {
                 node.y = 0;
 
                 itemsToProcess.push({ container: frame, originalGroup: node });
-            } else if (node.type === "FRAME" || node.type === "COMPONENT" || node.type === "COMPONENT_SET") {
+            } else if (node.type === "FRAME" || node.type === "COMPONENT") {
                 itemsToProcess.push({ container: node });
+            } else if (node.type === "COMPONENT_SET") {
+                // Expand into individual Variants to avoid merging all vectors
+                for (const variant of node.children) {
+                    if (variant.type === "COMPONENT") {
+                        itemsToProcess.push({ container: variant });
+                    }
+                }
             }
         }
 
         for (const item of itemsToProcess) {
             const node = item.container;
             // Type guard after filtering
-            if (node.type !== "FRAME" && node.type !== "COMPONENT" && node.type !== "COMPONENT_SET") continue;
+            if (node.type !== "FRAME" && node.type !== "COMPONENT") continue;
 
-            // Find all vector children
+            // Find all vector children (excluding RECTANGLEs — those are cleaned up separately)
             const vectorNodes: SceneNode[] = node.findAll(n =>
                 n.type === "VECTOR" ||
                 n.type === "STAR" ||
@@ -368,23 +375,14 @@ figma.ui.onmessage = async msg => {
                     }
                 }
 
-                // Cleanup: Remove original group if it exists
-                // This must happen AFTER all async operations are complete
-                if (item.originalGroup) {
-                    try {
-                        if (!item.originalGroup.removed) {
-                            item.originalGroup.remove();
-                        }
-                    } catch (e) {
-                        // Ignore cleanup errors
-                    }
-                }
-
-                // Fallback cleanup for any other empty groups within the frame
+                // Cleanup: Remove ALL remaining children except the flattened vector
+                // This handles bounding boxes, original groups, leftover layers, etc.
                 try {
-                    const emptyGroups = node.findAll(n => n.type === "GROUP" && n.children.length === 0);
-                    for (const group of emptyGroups) {
-                        group.remove();
+                    const children = [...node.children];
+                    for (const child of children) {
+                        if (child.id !== flattened.id) {
+                            try { child.remove(); } catch (e) { /* ignore */ }
+                        }
                     }
                 } catch (e) {
                     // Ignore cleanup errors
